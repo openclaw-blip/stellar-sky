@@ -87,11 +87,20 @@ export async function loadStarData(
   url: string,
   maxMagnitude: number = 8.0  // Limit to visible stars (mag < 8)
 ): Promise<StarData> {
+  console.log('Loading star data from:', url);
   const response = await fetch(url);
+  
+  if (!response.ok) {
+    throw new Error(`Failed to fetch star data: ${response.status} ${response.statusText}`);
+  }
+  
   const text = await response.text();
+  console.log('Star data loaded, size:', text.length, 'bytes');
   
   const lines = text.split('\n');
-  const header = lines[0].split(',').map(h => h.replace(/"/g, ''));
+  console.log('Total lines:', lines.length);
+  
+  const header = lines[0].split(',').map(h => h.replace(/"/g, '').trim());
   
   // Find column indices
   const cols = {
@@ -104,6 +113,9 @@ export async function loadStarData(
     bayer: header.indexOf('bayer'),
     con: header.indexOf('con'),
   };
+  
+  console.log('Column indices:', cols);
+  console.log('Header sample:', header.slice(0, 10));
   
   const stars: Star[] = [];
   

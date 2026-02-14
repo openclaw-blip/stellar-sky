@@ -29,14 +29,18 @@ function App() {
   // Load star data on mount
   useEffect(() => {
     // Use import.meta.env.BASE_URL for correct path in production
-    loadStarData(`${import.meta.env.BASE_URL}data/hyg.csv`, 7.0)
+    const dataUrl = `${import.meta.env.BASE_URL}data/hyg.csv`;
+    console.log('Loading stars from:', dataUrl);
+    
+    loadStarData(dataUrl, 7.0)
       .then(data => {
+        console.log('Stars loaded successfully:', data.count);
         setStarData(data);
         setLoading(false);
       })
       .catch(err => {
         console.error('Failed to load star data:', err);
-        setError('Failed to load star database');
+        setError(`Failed to load star database: ${err.message}`);
         setLoading(false);
       });
   }, []);
