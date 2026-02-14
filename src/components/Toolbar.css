@@ -23,7 +23,12 @@
 }
 
 .toolbar-toggle:hover {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 0.85);
+}
+
+.light-mode .toolbar-toggle {
+  background: rgba(0, 0, 0, 0.8);
+  border-color: rgba(0, 0, 0, 0.3);
 }
 
 .toolbar-content {
@@ -34,6 +39,11 @@
   padding: 12px;
   backdrop-filter: blur(8px);
   min-width: 180px;
+}
+
+.light-mode .toolbar-content {
+  background: rgba(0, 0, 0, 0.8);
+  border-color: rgba(0, 0, 0, 0.3);
 }
 
 .toolbar-section {

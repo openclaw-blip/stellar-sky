@@ -80,7 +80,7 @@ function App() {
   }
 
   return (
-    <div className="app">
+    <div className={`app ${toolbarOptions.lightMode ? 'light-mode' : 'dark-mode'}`}>
       <SkyCanvas 
         starData={starData}
         location={location}
