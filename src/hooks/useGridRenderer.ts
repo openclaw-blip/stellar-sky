@@ -163,13 +163,13 @@ function createViewMatrix(yaw: number, pitch: number): Float32Array {
 
 function multiplyMatrices(a: Float32Array, b: Float32Array): Float32Array {
   const result = new Float32Array(16);
-  for (let i = 0; i < 4; i++) {
-    for (let j = 0; j < 4; j++) {
-      result[i * 4 + j] = 
-        a[i * 4 + 0] * b[0 * 4 + j] +
-        a[i * 4 + 1] * b[1 * 4 + j] +
-        a[i * 4 + 2] * b[2 * 4 + j] +
-        a[i * 4 + 3] * b[3 * 4 + j];
+  for (let col = 0; col < 4; col++) {
+    for (let row = 0; row < 4; row++) {
+      result[col * 4 + row] = 
+        a[0 * 4 + row] * b[col * 4 + 0] +
+        a[1 * 4 + row] * b[col * 4 + 1] +
+        a[2 * 4 + row] * b[col * 4 + 2] +
+        a[3 * 4 + row] * b[col * 4 + 3];
     }
   }
   return result;
