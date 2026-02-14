@@ -84,7 +84,7 @@ function colorIndexToRGB(ci: number): [number, number, number] {
  * Load and parse the HYG star database
  */
 export async function loadStarData(
-  url: string = '/data/hyg.csv',
+  url: string,
   maxMagnitude: number = 8.0  // Limit to visible stars (mag < 8)
 ): Promise<StarData> {
   const response = await fetch(url);

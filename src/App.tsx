@@ -18,7 +18,8 @@ function App() {
 
   // Load star data on mount
   useEffect(() => {
-    loadStarData('/data/hyg.csv', 7.0)
+    // Use import.meta.env.BASE_URL for correct path in production
+    loadStarData(`${import.meta.env.BASE_URL}data/hyg.csv`, 7.0)
       .then(data => {
         setStarData(data);
         setLoading(false);
