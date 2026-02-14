@@ -244,8 +244,12 @@
 /* Mobile */
 @media (max-width: 640px) {
   .location-button {
-    padding: 7px 12px;
-    font-size: 10px;
+    padding: 6px 10px;
+    font-size: 9px;
+  }
+  
+  .location-button::before {
+    content: '◎';
   }
   
   .location-modal {
@@ -254,36 +258,43 @@
   }
   
   .location-header h3 {
-    font-size: 12px;
+    font-size: 11px;
     letter-spacing: 2px;
   }
   
   .close-button {
-    width: 28px;
-    height: 28px;
+    width: 26px;
+    height: 26px;
     font-size: 14px;
   }
   
   .world-map {
-    height: 150px;
+    height: 130px;
   }
   
   .coord-field label {
-    font-size: 9px;
+    font-size: 8px;
   }
   
   .coord-field input {
-    padding: 8px 10px;
-    font-size: 11px;
-  }
-  
-  .my-location-button {
-    padding: 10px;
+    padding: 7px 8px;
     font-size: 10px;
   }
   
-  .preset-button {
-    padding: 6px 10px;
+  .my-location-button {
+    padding: 8px;
     font-size: 9px;
+  }
+  
+  .preset-button {
+    padding: 5px 8px;
+    font-size: 8px;
+  }
+}
+
+@media (max-width: 400px) {
+  .location-button {
+    padding: 5px 8px;
+    font-size: 8px;
   }
 }

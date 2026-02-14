@@ -225,50 +225,66 @@
 /* Mobile */
 @media (max-width: 640px) {
   .time-button {
-    padding: 7px 12px;
-    gap: 8px;
+    padding: 6px 10px;
+    gap: 6px;
+    flex-wrap: wrap;
   }
   
   .time-display {
-    font-size: 12px;
+    font-size: 11px;
   }
   
   .date-display {
-    font-size: 9px;
+    font-size: 8px;
   }
   
   .realtime-badge {
-    font-size: 7px;
-    padding: 2px 5px;
+    font-size: 6px;
+    padding: 2px 4px;
   }
   
   .time-modal {
-    padding: 16px;
+    padding: 14px;
     max-width: 95%;
   }
   
   .time-header h3 {
-    font-size: 12px;
+    font-size: 11px;
     letter-spacing: 2px;
   }
   
   .time-field label {
-    font-size: 9px;
+    font-size: 8px;
   }
   
   .time-field input {
-    padding: 8px 10px;
-    font-size: 11px;
+    padding: 7px 8px;
+    font-size: 10px;
   }
   
   .time-actions .apply-button,
   .time-actions .now-button {
-    padding: 10px;
-    font-size: 9px;
+    padding: 8px;
+    font-size: 8px;
   }
   
   .shortcut-buttons button {
-    padding: 6px 10px;
-    font-size: 9px;
+    padding: 5px 8px;
+    font-size: 8px;
+  }
+}
+
+@media (max-width: 400px) {
+  .time-button {
+    padding: 5px 8px;
+    gap: 4px;
+  }
+  
+  .time-display {
+    font-size: 10px;
+  }
+  
+  .date-display {
+    display: none;
   }
 }
