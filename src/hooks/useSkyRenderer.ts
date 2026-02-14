@@ -32,22 +32,21 @@ void main() {
   
   // Calculate point size based on magnitude
   // Brighter stars (lower magnitude) = larger points
-  // Magnitude scale: -1 (very bright) to 8 (dim)
-  // Use linear scale for better visibility of dim stars
-  float magNorm = clamp((8.0 - a_magnitude) / 9.0, 0.0, 1.0); // 0 for mag 8, 1 for mag -1
-  float size = u_magnitudeScale * (0.5 + magNorm * 2.5) * u_pointScale;
+  // Magnitude scale: -1 (very bright) to 6 (dim)
+  float magNorm = clamp((6.0 - a_magnitude) / 7.0, 0.0, 1.0); // 0 for mag 6, 1 for mag -1
+  float size = u_magnitudeScale * (0.3 + magNorm * 1.2) * u_pointScale;
   
   // In light mode, make stars slightly larger for visibility
   if (u_lightMode == 1) {
-    size *= 1.2;
+    size *= 1.1;
   }
   
-  // Clamp size
-  gl_PointSize = clamp(size, 1.5, 30.0);
+  // Clamp size - smaller min/max
+  gl_PointSize = clamp(size, 1.0, 15.0);
   
   v_color = a_color;
-  // Brightness for alpha: dim stars still visible, bright stars pop
-  v_brightness = 0.4 + magNorm * 0.6;
+  // Brightness for alpha: more contrast between bright and dim
+  v_brightness = 0.3 + magNorm * 0.7;
 }
 `;
 

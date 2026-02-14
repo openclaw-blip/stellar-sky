@@ -33,7 +33,7 @@ function App() {
     const dataUrl = `${import.meta.env.BASE_URL}data/hyg.csv`;
     console.log('Loading stars from:', dataUrl);
     
-    loadStarData(dataUrl, 7.0)
+    loadStarData(dataUrl, 6.0)
       .then(data => {
         console.log('Stars loaded successfully:', data.count);
         setStarData(data);
