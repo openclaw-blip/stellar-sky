@@ -1,73 +1,43 @@
-# React + TypeScript + Vite
+# Stellar Sky - Virtual Planetarium
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A WebGL-powered virtual planetarium that lets you explore the night sky from any location on Earth.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **119,627 stars** from the HYG (Hipparcos, Yale, Gliese) stellar database
+- **Location selection** - Pick any point on Earth to view the sky from
+- **Real-time sky** - Stars rotate accurately based on your location and time
+- **Time control** - View the sky at any date/time, or watch it live
+- **Accurate colors** - Star colors derived from B-V color index (spectral type)
+- **Magnitude-based rendering** - Brighter stars appear larger and more prominent
 
-## React Compiler
+## Tech Stack
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- React + TypeScript + Vite
+- WebGL 2.0 for hardware-accelerated star rendering
+- Perturbation-free celestial coordinate transforms
+- HYG v4.1 star database
 
-## Expanding the ESLint configuration
+## Getting Started
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm install
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Star Data
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+Uses the [HYG Database](https://github.com/astronexus/HYG-Database) - a compilation of:
+- Hipparcos Catalog (~118,000 stars)
+- Yale Bright Star Catalog
+- Gliese Catalog of Nearby Stars
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+## Controls
+
+- **Drag** to look around the sky
+- **Location picker** to change your viewing location
+- **Time picker** to change date/time or enable live mode
+
+## License
+
+MIT
