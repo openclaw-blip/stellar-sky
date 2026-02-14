@@ -35,7 +35,7 @@ export function SkyCanvas({ starData, location, date, gridOptions, onViewChange 
     starData,
     location,
     date,
-    { lightMode: gridOptions.lightMode, magnitudeScale: 10 }
+    { lightMode: gridOptions.lightMode, magnitudeScale: 10, pixelStars: gridOptions.pixelStars }
   );
   
   const { render: renderGrid, getConstellationLabels } = useGridRenderer(

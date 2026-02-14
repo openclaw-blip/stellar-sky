@@ -190,6 +190,7 @@ export interface GridOptions {
   showHorizon: boolean;
   showCardinals: boolean;
   lightMode: boolean;
+  pixelStars?: boolean;
 }
 
 // Convert celestial coordinates (RA in degrees, Dec in degrees) to 3D cartesian

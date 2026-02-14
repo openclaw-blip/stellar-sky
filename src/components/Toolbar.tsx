@@ -8,6 +8,7 @@ export interface ToolbarOptions {
   showHorizon: boolean;
   showCardinals: boolean;
   lightMode: boolean;
+  pixelStars: boolean;
 }
 
 interface ToolbarProps {
@@ -45,6 +46,16 @@ export function Toolbar({ options, onOptionsChange }: ToolbarProps) {
               />
               <span className="option-icon">☀</span>
               <span className="option-label">Light Mode</span>
+            </label>
+            
+            <label className="toolbar-option">
+              <input
+                type="checkbox"
+                checked={options.pixelStars}
+                onChange={() => toggle('pixelStars')}
+              />
+              <span className="option-icon">▪</span>
+              <span className="option-label">Pixel Stars</span>
             </label>
           </div>
           

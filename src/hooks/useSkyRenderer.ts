@@ -57,24 +57,30 @@ in vec3 v_color;
 in float v_brightness;
 
 uniform lowp int u_lightMode;
+uniform lowp int u_pixelStars;
 
 out vec4 fragColor;
 
 void main() {
-  // Create circular point with soft edges
   vec2 coord = gl_PointCoord - vec2(0.5);
   float dist = length(coord);
   
-  // Soft circular falloff
-  float alpha = 1.0 - smoothstep(0.3, 0.5, dist);
+  float alpha;
+  if (u_pixelStars == 1) {
+    // Pixel mode: hard square edges
+    alpha = (abs(coord.x) < 0.4 && abs(coord.y) < 0.4) ? 1.0 : 0.0;
+  } else {
+    // Circle mode: soft circular falloff
+    alpha = 1.0 - smoothstep(0.3, 0.5, dist);
+  }
   
   if (u_lightMode == 1) {
     // Light mode: colored stars on white background (darken the colors)
-    vec3 darkColor = v_color * 0.4; // Darken for visibility on white
+    vec3 darkColor = v_color * 0.4;
     fragColor = vec4(darkColor, alpha * v_brightness);
   } else {
     // Dark mode: colored glowing stars
-    float glow = exp(-dist * 3.0) * v_brightness;
+    float glow = u_pixelStars == 1 ? 0.0 : exp(-dist * 3.0) * v_brightness;
     vec3 color = v_color * (0.7 + v_brightness * 0.3 + glow * 0.3);
     fragColor = vec4(color, alpha);
   }
@@ -171,6 +177,7 @@ export interface SkyRendererOptions {
   fov?: number;
   magnitudeScale?: number;
   lightMode?: boolean;
+  pixelStars?: boolean;
 }
 
 export function useSkyRenderer(
@@ -180,7 +187,7 @@ export function useSkyRenderer(
   date: Date,
   options: SkyRendererOptions = {}
 ) {
-  const { fov = 60, magnitudeScale = 15, lightMode = false } = options;
+  const { fov = 60, magnitudeScale = 15, lightMode = false, pixelStars = false } = options;
   
   const glRef = useRef<WebGL2RenderingContext | null>(null);
   const programRef = useRef<WebGLProgram | null>(null);
@@ -191,6 +198,7 @@ export function useSkyRenderer(
     pointScale: WebGLUniformLocation | null;
     magnitudeScale: WebGLUniformLocation | null;
     lightMode: WebGLUniformLocation | null;
+    pixelStars: WebGLUniformLocation | null;
   } | null>(null);
   
   const viewRef = useRef({ yaw: 0, pitch: 0 });
@@ -229,6 +237,7 @@ export function useSkyRenderer(
       celestialRotation: gl.getUniformLocation(program, 'u_celestialRotation'),
       pointScale: gl.getUniformLocation(program, 'u_pointScale'),
       magnitudeScale: gl.getUniformLocation(program, 'u_magnitudeScale'),
+      pixelStars: gl.getUniformLocation(program, 'u_pixelStars'),
       lightMode: gl.getUniformLocation(program, 'u_lightMode'),
     };
     
@@ -334,10 +343,11 @@ export function useSkyRenderer(
     gl.uniform1f(uniforms.pointScale, Math.min(width, height) / 800);
     gl.uniform1f(uniforms.magnitudeScale, magnitudeScale);
     gl.uniform1i(uniforms.lightMode, lightMode ? 1 : 0);
+    gl.uniform1i(uniforms.pixelStars, pixelStars ? 1 : 0);
     
     // Draw stars
     gl.drawArrays(gl.POINTS, 0, starCountRef.current);
-  }, [canvasRef, location, date, fov, magnitudeScale, lightMode]);
+  }, [canvasRef, location, date, fov, magnitudeScale, lightMode, pixelStars]);
 
   // Set view direction
   const setView = useCallback((yaw: number, pitch: number) => {

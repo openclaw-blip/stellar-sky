@@ -28,6 +28,7 @@ function App() {
     showHorizon: true,
     showCardinals: true,
     lightMode: false,
+    pixelStars: false,
   });
 
   // Load star data on mount
