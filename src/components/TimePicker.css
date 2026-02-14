@@ -1,0 +1,184 @@
+.time-picker {
+  position: relative;
+}
+
+.time-button {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 16px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  color: white;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.time-button:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.time-display {
+  font-weight: 600;
+  font-size: 16px;
+}
+
+.date-display {
+  opacity: 0.8;
+}
+
+.realtime-badge {
+  background: #ff4444;
+  color: white;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 3px;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+.time-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.time-modal {
+  background: #1a1a2e;
+  border-radius: 12px;
+  padding: 20px;
+  width: 90%;
+  max-width: 360px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+}
+
+.time-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.time-header h3 {
+  margin: 0;
+  color: white;
+  font-size: 18px;
+}
+
+.time-inputs {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.time-field {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.time-field label {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 12px;
+}
+
+.time-field input {
+  padding: 10px 12px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+  color: white;
+  font-size: 14px;
+}
+
+.time-field input:focus {
+  outline: none;
+  border-color: #4a9eff;
+}
+
+.time-field input::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+}
+
+.time-actions {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.time-actions .apply-button {
+  flex: 1;
+  padding: 10px;
+  background: #4a9eff;
+  border: none;
+  border-radius: 6px;
+  color: white;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.time-actions .apply-button:hover {
+  background: #3a8eef;
+}
+
+.time-actions .now-button {
+  flex: 1;
+  padding: 10px;
+  background: rgba(255, 68, 68, 0.2);
+  border: 1px solid rgba(255, 68, 68, 0.4);
+  border-radius: 6px;
+  color: #ff6666;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.time-actions .now-button:hover {
+  background: rgba(255, 68, 68, 0.3);
+}
+
+.time-shortcuts {
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding-top: 16px;
+}
+
+.shortcuts-label {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 12px;
+  margin-bottom: 8px;
+}
+
+.shortcut-buttons {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.shortcut-buttons button {
+  padding: 6px 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 4px;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.shortcut-buttons button:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: white;
+}

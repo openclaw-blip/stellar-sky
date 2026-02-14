@@ -1,0 +1,333 @@
+/**
+ * WebGL Sky Renderer Hook
+ * Renders stars as point sprites with proper magnitude-based sizing and coloring
+ */
+
+import { useCallback, useEffect, useRef } from 'react';
+import type { StarData } from '../utils/starLoader';
+import { getCelestialRotationMatrix, type GeoLocation } from '../utils/astronomy';
+
+const vertexShaderSource = `#version 300 es
+precision highp float;
+
+in vec3 a_position;
+in float a_magnitude;
+in vec3 a_color;
+
+uniform mat4 u_viewProjection;
+uniform mat4 u_celestialRotation;
+uniform float u_pointScale;
+uniform float u_magnitudeScale;
+
+out vec3 v_color;
+out float v_brightness;
+
+void main() {
+  // Rotate star position from celestial to observer coordinates
+  vec4 rotatedPos = u_celestialRotation * vec4(a_position, 1.0);
+  
+  // Project onto screen
+  gl_Position = u_viewProjection * rotatedPos;
+  
+  // Calculate point size based on magnitude
+  // Brighter stars (lower magnitude) = larger points
+  // Magnitude scale: -1 (very bright) to 8 (dim)
+  float brightness = pow(10.0, (0.0 - a_magnitude) / 2.5);
+  float size = u_magnitudeScale * sqrt(brightness) * u_pointScale;
+  
+  // Clamp size
+  gl_PointSize = clamp(size, 1.0, 30.0);
+  
+  v_color = a_color;
+  v_brightness = min(brightness * 2.0, 1.0);
+}
+`;
+
+const fragmentShaderSource = `#version 300 es
+precision highp float;
+
+in vec3 v_color;
+in float v_brightness;
+
+out vec4 fragColor;
+
+void main() {
+  // Create circular point with soft edges
+  vec2 coord = gl_PointCoord - vec2(0.5);
+  float dist = length(coord);
+  
+  // Soft circular falloff
+  float alpha = 1.0 - smoothstep(0.3, 0.5, dist);
+  
+  // Add glow for bright stars
+  float glow = exp(-dist * 4.0) * v_brightness;
+  
+  // Combine color with brightness
+  vec3 color = v_color * (v_brightness + glow * 0.5);
+  
+  fragColor = vec4(color, alpha * v_brightness);
+}
+`;
+
+function createShader(gl: WebGL2RenderingContext, type: number, source: string): WebGLShader | null {
+  const shader = gl.createShader(type);
+  if (!shader) return null;
+  
+  gl.shaderSource(shader, source);
+  gl.compileShader(shader);
+  
+  if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+    console.error('Shader compile error:', gl.getShaderInfoLog(shader));
+    gl.deleteShader(shader);
+    return null;
+  }
+  
+  return shader;
+}
+
+function createProgram(gl: WebGL2RenderingContext, vs: WebGLShader, fs: WebGLShader): WebGLProgram | null {
+  const program = gl.createProgram();
+  if (!program) return null;
+  
+  gl.attachShader(program, vs);
+  gl.attachShader(program, fs);
+  gl.linkProgram(program);
+  
+  if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+    console.error('Program link error:', gl.getProgramInfoLog(program));
+    gl.deleteProgram(program);
+    return null;
+  }
+  
+  return program;
+}
+
+/**
+ * Create a perspective projection matrix for the sky dome
+ */
+function createProjectionMatrix(fov: number, aspect: number): Float32Array {
+  const f = 1.0 / Math.tan(fov * Math.PI / 360);
+  const near = 0.1;
+  const far = 10.0;
+  const rangeInv = 1.0 / (near - far);
+  
+  return new Float32Array([
+    f / aspect, 0, 0, 0,
+    0, f, 0, 0,
+    0, 0, (near + far) * rangeInv, -1,
+    0, 0, near * far * rangeInv * 2, 0
+  ]);
+}
+
+/**
+ * Create a view matrix for looking in a direction
+ */
+function createViewMatrix(yaw: number, pitch: number): Float32Array {
+  const cy = Math.cos(yaw);
+  const sy = Math.sin(yaw);
+  const cp = Math.cos(pitch);
+  const sp = Math.sin(pitch);
+  
+  // Look direction
+  return new Float32Array([
+    cy, sy * sp, -sy * cp, 0,
+    0, cp, sp, 0,
+    sy, -cy * sp, cy * cp, 0,
+    0, 0, 0, 1
+  ]);
+}
+
+/**
+ * Multiply two 4x4 matrices
+ */
+function multiplyMatrices(a: Float32Array, b: Float32Array): Float32Array {
+  const result = new Float32Array(16);
+  for (let i = 0; i < 4; i++) {
+    for (let j = 0; j < 4; j++) {
+      result[i * 4 + j] = 
+        a[i * 4 + 0] * b[0 * 4 + j] +
+        a[i * 4 + 1] * b[1 * 4 + j] +
+        a[i * 4 + 2] * b[2 * 4 + j] +
+        a[i * 4 + 3] * b[3 * 4 + j];
+    }
+  }
+  return result;
+}
+
+export interface SkyRendererOptions {
+  fov?: number;
+  magnitudeScale?: number;
+}
+
+export function useSkyRenderer(
+  canvasRef: React.RefObject<HTMLCanvasElement | null>,
+  starData: StarData | null,
+  location: GeoLocation,
+  date: Date,
+  options: SkyRendererOptions = {}
+) {
+  const { fov = 60, magnitudeScale = 15 } = options;
+  
+  const glRef = useRef<WebGL2RenderingContext | null>(null);
+  const programRef = useRef<WebGLProgram | null>(null);
+  const vaoRef = useRef<WebGLVertexArrayObject | null>(null);
+  const uniformsRef = useRef<{
+    viewProjection: WebGLUniformLocation | null;
+    celestialRotation: WebGLUniformLocation | null;
+    pointScale: WebGLUniformLocation | null;
+    magnitudeScale: WebGLUniformLocation | null;
+  } | null>(null);
+  
+  const viewRef = useRef({ yaw: 0, pitch: 0 });
+  const starCountRef = useRef(0);
+
+  // Initialize WebGL
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    
+    const gl = canvas.getContext('webgl2', { antialias: true, alpha: false });
+    if (!gl) {
+      console.error('WebGL 2 not supported');
+      return;
+    }
+    
+    // Create shaders and program
+    const vs = createShader(gl, gl.VERTEX_SHADER, vertexShaderSource);
+    const fs = createShader(gl, gl.FRAGMENT_SHADER, fragmentShaderSource);
+    if (!vs || !fs) return;
+    
+    const program = createProgram(gl, vs, fs);
+    if (!program) return;
+    
+    // Get uniform locations
+    uniformsRef.current = {
+      viewProjection: gl.getUniformLocation(program, 'u_viewProjection'),
+      celestialRotation: gl.getUniformLocation(program, 'u_celestialRotation'),
+      pointScale: gl.getUniformLocation(program, 'u_pointScale'),
+      magnitudeScale: gl.getUniformLocation(program, 'u_magnitudeScale'),
+    };
+    
+    glRef.current = gl;
+    programRef.current = program;
+    
+    // Enable blending for star glow
+    gl.enable(gl.BLEND);
+    gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
+    
+    return () => {
+      gl.deleteProgram(program);
+      gl.deleteShader(vs);
+      gl.deleteShader(fs);
+    };
+  }, [canvasRef]);
+
+  // Upload star data when available
+  useEffect(() => {
+    const gl = glRef.current;
+    const program = programRef.current;
+    if (!gl || !program || !starData) return;
+    
+    // Create and bind VAO
+    const vao = gl.createVertexArray();
+    gl.bindVertexArray(vao);
+    
+    // Position buffer
+    const posBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, posBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, starData.positions, gl.STATIC_DRAW);
+    const posLoc = gl.getAttribLocation(program, 'a_position');
+    gl.enableVertexAttribArray(posLoc);
+    gl.vertexAttribPointer(posLoc, 3, gl.FLOAT, false, 0, 0);
+    
+    // Magnitude buffer
+    const magBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, magBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, starData.magnitudes, gl.STATIC_DRAW);
+    const magLoc = gl.getAttribLocation(program, 'a_magnitude');
+    gl.enableVertexAttribArray(magLoc);
+    gl.vertexAttribPointer(magLoc, 1, gl.FLOAT, false, 0, 0);
+    
+    // Color buffer
+    const colorBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, starData.colors, gl.STATIC_DRAW);
+    const colorLoc = gl.getAttribLocation(program, 'a_color');
+    gl.enableVertexAttribArray(colorLoc);
+    gl.vertexAttribPointer(colorLoc, 3, gl.FLOAT, false, 0, 0);
+    
+    vaoRef.current = vao;
+    starCountRef.current = starData.count;
+    
+    return () => {
+      gl.deleteBuffer(posBuffer);
+      gl.deleteBuffer(magBuffer);
+      gl.deleteBuffer(colorBuffer);
+      gl.deleteVertexArray(vao);
+    };
+  }, [starData]);
+
+  // Render function
+  const render = useCallback(() => {
+    const gl = glRef.current;
+    const program = programRef.current;
+    const uniforms = uniformsRef.current;
+    const vao = vaoRef.current;
+    const canvas = canvasRef.current;
+    
+    if (!gl || !program || !uniforms || !vao || !canvas) return;
+    
+    const width = canvas.width;
+    const height = canvas.height;
+    
+    gl.viewport(0, 0, width, height);
+    
+    // Dark blue night sky background
+    gl.clearColor(0.02, 0.02, 0.08, 1.0);
+    gl.clear(gl.COLOR_BUFFER_BIT);
+    
+    gl.useProgram(program);
+    gl.bindVertexArray(vao);
+    
+    // Calculate matrices
+    const aspect = width / height;
+    const projection = createProjectionMatrix(fov, aspect);
+    const view = createViewMatrix(viewRef.current.yaw, viewRef.current.pitch);
+    const viewProjection = multiplyMatrices(projection, view);
+    
+    // Get celestial rotation for current time and location
+    const celestialRotation = getCelestialRotationMatrix(location, date);
+    
+    // Set uniforms
+    gl.uniformMatrix4fv(uniforms.viewProjection, false, viewProjection);
+    gl.uniformMatrix4fv(uniforms.celestialRotation, false, celestialRotation);
+    gl.uniform1f(uniforms.pointScale, Math.min(width, height) / 800);
+    gl.uniform1f(uniforms.magnitudeScale, magnitudeScale);
+    
+    // Draw stars
+    gl.drawArrays(gl.POINTS, 0, starCountRef.current);
+  }, [canvasRef, location, date, fov, magnitudeScale]);
+
+  // Set view direction
+  const setView = useCallback((yaw: number, pitch: number) => {
+    viewRef.current = { yaw, pitch };
+  }, []);
+
+  // Handle resize
+  const handleResize = useCallback(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    
+    const dpr = window.devicePixelRatio || 1;
+    const rect = canvas.getBoundingClientRect();
+    canvas.width = rect.width * dpr;
+    canvas.height = rect.height * dpr;
+  }, [canvasRef]);
+
+  return {
+    render,
+    setView,
+    handleResize,
+    getView: () => viewRef.current,
+  };
+}
