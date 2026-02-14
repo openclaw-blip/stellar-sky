@@ -159,26 +159,31 @@ body {
 @media (max-width: 640px) {
   .controls {
     top: auto;
-    bottom: 50px;
-    right: 8px;
+    bottom: 35px;
+    right: 6px;
     left: auto;
     flex-direction: row;
-    gap: 6px;
+    gap: 4px;
   }
   
   .star-info {
-    bottom: 8px;
-    left: 8px;
+    bottom: 6px;
+    left: 6px;
     right: auto;
-    padding: 5px 8px;
-    font-size: 8px;
+    padding: 3px 6px;
+    font-size: 7px;
   }
 }
 
-@media (max-width: 480px) and (orientation: portrait) {
+@media (max-width: 400px) {
   .controls {
-    bottom: 45px;
-    right: 6px;
-    gap: 4px;
+    bottom: 30px;
+    right: 4px;
+    gap: 3px;
+  }
+  
+  .star-info {
+    padding: 2px 5px;
+    font-size: 6px;
   }
 }

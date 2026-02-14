@@ -225,66 +225,70 @@
 /* Mobile */
 @media (max-width: 640px) {
   .time-button {
-    padding: 6px 10px;
-    gap: 6px;
-    flex-wrap: wrap;
+    padding: 4px 8px;
+    gap: 4px;
   }
   
   .time-display {
-    font-size: 11px;
+    font-size: 9px;
   }
   
   .date-display {
-    font-size: 8px;
+    font-size: 7px;
   }
   
   .realtime-badge {
-    font-size: 6px;
-    padding: 2px 4px;
+    font-size: 5px;
+    padding: 1px 3px;
   }
   
   .time-modal {
-    padding: 14px;
+    padding: 12px;
     max-width: 95%;
   }
   
   .time-header h3 {
-    font-size: 11px;
-    letter-spacing: 2px;
+    font-size: 10px;
+    letter-spacing: 1.5px;
   }
   
   .time-field label {
-    font-size: 8px;
+    font-size: 7px;
   }
   
   .time-field input {
-    padding: 7px 8px;
-    font-size: 10px;
+    padding: 5px 6px;
+    font-size: 9px;
   }
   
   .time-actions .apply-button,
   .time-actions .now-button {
-    padding: 8px;
-    font-size: 8px;
+    padding: 6px;
+    font-size: 7px;
   }
   
   .shortcut-buttons button {
-    padding: 5px 8px;
-    font-size: 8px;
+    padding: 4px 6px;
+    font-size: 7px;
   }
 }
 
 @media (max-width: 400px) {
   .time-button {
-    padding: 5px 8px;
-    gap: 4px;
+    padding: 3px 6px;
+    gap: 3px;
   }
   
   .time-display {
-    font-size: 10px;
+    font-size: 8px;
   }
   
   .date-display {
     display: none;
+  }
+  
+  .realtime-badge {
+    font-size: 5px;
+    padding: 1px 2px;
   }
 }
