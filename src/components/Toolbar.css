@@ -126,12 +126,56 @@
 /* Mobile */
 @media (max-width: 640px) {
   .toolbar {
-    top: auto;
-    bottom: 60px;
-    left: 10px;
+    top: 8px;
+    left: 8px;
+  }
+  
+  .toolbar-toggle {
+    width: 28px;
+    height: 28px;
+    font-size: 11px;
   }
   
   .toolbar-content {
-    min-width: 170px;
+    min-width: 150px;
+    padding: 10px;
+  }
+  
+  .toolbar-section-title {
+    font-size: 8px;
+    letter-spacing: 1.5px;
+    margin-bottom: 6px;
+  }
+  
+  .toolbar-option {
+    padding: 5px 8px;
+    margin: 0 -8px;
+    gap: 8px;
+  }
+  
+  .toolbar-option input[type="checkbox"] + .option-icon {
+    width: 18px;
+    height: 18px;
+    font-size: 9px;
+  }
+  
+  .option-label {
+    font-size: 10px;
+  }
+  
+  .toolbar-section + .toolbar-section {
+    margin-top: 10px;
+    padding-top: 10px;
+  }
+}
+
+@media (max-width: 400px) {
+  .toolbar-content {
+    min-width: 130px;
+    padding: 8px;
+  }
+  
+  .option-label {
+    font-size: 9px;
   }
 }

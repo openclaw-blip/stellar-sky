@@ -240,3 +240,50 @@
   border-color: var(--accent);
   color: var(--accent);
 }
+
+/* Mobile */
+@media (max-width: 640px) {
+  .location-button {
+    padding: 7px 12px;
+    font-size: 10px;
+  }
+  
+  .location-modal {
+    padding: 16px;
+    max-width: 95%;
+  }
+  
+  .location-header h3 {
+    font-size: 12px;
+    letter-spacing: 2px;
+  }
+  
+  .close-button {
+    width: 28px;
+    height: 28px;
+    font-size: 14px;
+  }
+  
+  .world-map {
+    height: 150px;
+  }
+  
+  .coord-field label {
+    font-size: 9px;
+  }
+  
+  .coord-field input {
+    padding: 8px 10px;
+    font-size: 11px;
+  }
+  
+  .my-location-button {
+    padding: 10px;
+    font-size: 10px;
+  }
+  
+  .preset-button {
+    padding: 6px 10px;
+    font-size: 9px;
+  }
+}

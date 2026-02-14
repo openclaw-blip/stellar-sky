@@ -221,3 +221,54 @@
   border-color: var(--accent);
   color: var(--accent);
 }
+
+/* Mobile */
+@media (max-width: 640px) {
+  .time-button {
+    padding: 7px 12px;
+    gap: 8px;
+  }
+  
+  .time-display {
+    font-size: 12px;
+  }
+  
+  .date-display {
+    font-size: 9px;
+  }
+  
+  .realtime-badge {
+    font-size: 7px;
+    padding: 2px 5px;
+  }
+  
+  .time-modal {
+    padding: 16px;
+    max-width: 95%;
+  }
+  
+  .time-header h3 {
+    font-size: 12px;
+    letter-spacing: 2px;
+  }
+  
+  .time-field label {
+    font-size: 9px;
+  }
+  
+  .time-field input {
+    padding: 8px 10px;
+    font-size: 11px;
+  }
+  
+  .time-actions .apply-button,
+  .time-actions .now-button {
+    padding: 10px;
+    font-size: 9px;
+  }
+  
+  .shortcut-buttons button {
+    padding: 6px 10px;
+    font-size: 9px;
+  }
+}

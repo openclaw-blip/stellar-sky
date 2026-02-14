@@ -128,3 +128,59 @@
   content: '◇ ';
   color: var(--accent);
 }
+
+/* Mobile */
+@media (max-width: 640px) {
+  .constellation-label {
+    font-size: 9px;
+    letter-spacing: 1px;
+  }
+  
+  .compass-overlay {
+    top: 10px;
+    padding: 8px 16px;
+  }
+  
+  .compass-direction {
+    font-size: 20px;
+    letter-spacing: 2px;
+  }
+  
+  .compass-degrees {
+    font-size: 10px;
+    margin-top: 2px;
+  }
+  
+  .compass-degrees::before {
+    font-size: 8px;
+  }
+  
+  .compass-altitude {
+    font-size: 9px;
+    margin-top: 2px;
+  }
+  
+  .instructions {
+    bottom: 10px;
+    padding: 6px 12px;
+    font-size: 9px;
+  }
+}
+
+@media (max-width: 400px) {
+  .compass-overlay {
+    padding: 6px 12px;
+  }
+  
+  .compass-direction {
+    font-size: 16px;
+  }
+  
+  .compass-degrees {
+    font-size: 9px;
+  }
+  
+  .compass-altitude {
+    font-size: 8px;
+  }
+}
