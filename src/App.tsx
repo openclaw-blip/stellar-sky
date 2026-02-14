@@ -23,6 +23,7 @@ function App() {
     showEquatorialGrid: false,
     showHorizon: true,
     showCardinals: true,
+    lightMode: false,
   });
 
   // Load star data on mount

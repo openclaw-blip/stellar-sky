@@ -18,6 +18,7 @@ uniform mat4 u_viewProjection;
 uniform mat4 u_celestialRotation;
 uniform float u_pointScale;
 uniform float u_magnitudeScale;
+uniform int u_lightMode;
 
 out vec3 v_color;
 out float v_brightness;
@@ -35,6 +36,11 @@ void main() {
   float brightness = pow(10.0, (0.0 - a_magnitude) / 2.5);
   float size = u_magnitudeScale * sqrt(brightness) * u_pointScale;
   
+  // In light mode, make stars slightly larger for visibility
+  if (u_lightMode == 1) {
+    size *= 1.2;
+  }
+  
   // Clamp size
   gl_PointSize = clamp(size, 1.0, 30.0);
   
@@ -49,6 +55,8 @@ precision highp float;
 in vec3 v_color;
 in float v_brightness;
 
+uniform int u_lightMode;
+
 out vec4 fragColor;
 
 void main() {
@@ -59,13 +67,16 @@ void main() {
   // Soft circular falloff
   float alpha = 1.0 - smoothstep(0.3, 0.5, dist);
   
-  // Add glow for bright stars
-  float glow = exp(-dist * 4.0) * v_brightness;
-  
-  // Combine color with brightness
-  vec3 color = v_color * (v_brightness + glow * 0.5);
-  
-  fragColor = vec4(color, alpha * v_brightness);
+  if (u_lightMode == 1) {
+    // Light mode: black stars on white background
+    float darkness = v_brightness * 0.9;
+    fragColor = vec4(0.0, 0.0, 0.0, alpha * darkness);
+  } else {
+    // Dark mode: colored glowing stars
+    float glow = exp(-dist * 4.0) * v_brightness;
+    vec3 color = v_color * (v_brightness + glow * 0.5);
+    fragColor = vec4(color, alpha * v_brightness);
+  }
 }
 `;
 
@@ -157,6 +168,7 @@ function multiplyMatrices(a: Float32Array, b: Float32Array): Float32Array {
 export interface SkyRendererOptions {
   fov?: number;
   magnitudeScale?: number;
+  lightMode?: boolean;
 }
 
 export function useSkyRenderer(
@@ -166,7 +178,7 @@ export function useSkyRenderer(
   date: Date,
   options: SkyRendererOptions = {}
 ) {
-  const { fov = 60, magnitudeScale = 15 } = options;
+  const { fov = 60, magnitudeScale = 15, lightMode = false } = options;
   
   const glRef = useRef<WebGL2RenderingContext | null>(null);
   const programRef = useRef<WebGLProgram | null>(null);
@@ -176,6 +188,7 @@ export function useSkyRenderer(
     celestialRotation: WebGLUniformLocation | null;
     pointScale: WebGLUniformLocation | null;
     magnitudeScale: WebGLUniformLocation | null;
+    lightMode: WebGLUniformLocation | null;
   } | null>(null);
   
   const viewRef = useRef({ yaw: 0, pitch: 0 });
@@ -206,6 +219,7 @@ export function useSkyRenderer(
       celestialRotation: gl.getUniformLocation(program, 'u_celestialRotation'),
       pointScale: gl.getUniformLocation(program, 'u_pointScale'),
       magnitudeScale: gl.getUniformLocation(program, 'u_magnitudeScale'),
+      lightMode: gl.getUniformLocation(program, 'u_lightMode'),
     };
     
     glRef.current = gl;
@@ -282,8 +296,14 @@ export function useSkyRenderer(
     
     gl.viewport(0, 0, width, height);
     
-    // Dark blue night sky background
-    gl.clearColor(0.02, 0.02, 0.08, 1.0);
+    // Background color based on mode
+    if (lightMode) {
+      gl.clearColor(0.95, 0.95, 0.92, 1.0); // Off-white
+      gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA); // Normal blending for light mode
+    } else {
+      gl.clearColor(0.02, 0.02, 0.08, 1.0); // Dark blue night sky
+      gl.blendFunc(gl.SRC_ALPHA, gl.ONE); // Additive blending for glow
+    }
     gl.clear(gl.COLOR_BUFFER_BIT);
     
     gl.useProgram(program);
@@ -303,10 +323,11 @@ export function useSkyRenderer(
     gl.uniformMatrix4fv(uniforms.celestialRotation, false, celestialRotation);
     gl.uniform1f(uniforms.pointScale, Math.min(width, height) / 800);
     gl.uniform1f(uniforms.magnitudeScale, magnitudeScale);
+    gl.uniform1i(uniforms.lightMode, lightMode ? 1 : 0);
     
     // Draw stars
     gl.drawArrays(gl.POINTS, 0, starCountRef.current);
-  }, [canvasRef, location, date, fov, magnitudeScale]);
+  }, [canvasRef, location, date, fov, magnitudeScale, lightMode]);
 
   // Set view direction
   const setView = useCallback((yaw: number, pitch: number) => {

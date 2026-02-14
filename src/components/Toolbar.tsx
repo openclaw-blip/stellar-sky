@@ -6,6 +6,7 @@ export interface ToolbarOptions {
   showEquatorialGrid: boolean;
   showHorizon: boolean;
   showCardinals: boolean;
+  lightMode: boolean;
 }
 
 interface ToolbarProps {
@@ -32,6 +33,20 @@ export function Toolbar({ options, onOptionsChange }: ToolbarProps) {
       
       {isExpanded && (
         <div className="toolbar-content">
+          <div className="toolbar-section">
+            <div className="toolbar-section-title">Display</div>
+            
+            <label className="toolbar-option">
+              <input
+                type="checkbox"
+                checked={options.lightMode}
+                onChange={() => toggle('lightMode')}
+              />
+              <span className="option-icon">☀</span>
+              <span className="option-label">Light Mode</span>
+            </label>
+          </div>
+          
           <div className="toolbar-section">
             <div className="toolbar-section-title">Grid Overlays</div>
             

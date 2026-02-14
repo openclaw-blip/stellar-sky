@@ -26,7 +26,8 @@ export function SkyCanvas({ starData, location, date, gridOptions, onViewChange 
     canvasRef,
     starData,
     location,
-    date
+    date,
+    { lightMode: gridOptions.lightMode }
   );
   
   const { render: renderGrid } = useGridRenderer(

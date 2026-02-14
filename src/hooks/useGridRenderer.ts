@@ -187,6 +187,7 @@ export interface GridOptions {
   showEquatorialGrid: boolean;
   showHorizon: boolean;
   showCardinals: boolean;
+  lightMode: boolean;
 }
 
 export function useGridRenderer(
@@ -329,16 +330,23 @@ export function useGridRenderer(
       });
     };
     
+    // Colors for light vs dark mode
+    const altAzColor = options.lightMode ? [0.2, 0.4, 0.7, 0.5] : [0.3, 0.5, 0.8, 0.4];
+    const altAzColorDim = options.lightMode ? [0.2, 0.4, 0.7, 0.35] : [0.3, 0.5, 0.8, 0.3];
+    const horizonColor = options.lightMode ? [0.6, 0.3, 0.1, 0.8] : [0.8, 0.4, 0.2, 0.7];
+    const eqColor = options.lightMode ? [0.5, 0.2, 0.5, 0.4] : [0.6, 0.3, 0.6, 0.3];
+    const eqColorDim = options.lightMode ? [0.5, 0.2, 0.5, 0.3] : [0.6, 0.3, 0.6, 0.25];
+    
     // Draw Alt/Az grid (in observer frame - identity transform)
     if (options.showAltAzGrid) {
-      drawLines(altCirclesRef.current, [0.3, 0.5, 0.8, 0.4], IDENTITY_MATRIX);
-      drawLines(azArcsRef.current, [0.3, 0.5, 0.8, 0.3], IDENTITY_MATRIX);
+      drawLines(altCirclesRef.current, altAzColor, IDENTITY_MATRIX);
+      drawLines(azArcsRef.current, altAzColorDim, IDENTITY_MATRIX);
     }
     
     // Draw horizon line
     if (options.showHorizon && horizonRef.current) {
       gl.uniformMatrix4fv(uniforms.transform, false, IDENTITY_MATRIX);
-      gl.uniform4fv(uniforms.color, [0.8, 0.4, 0.2, 0.7]);
+      gl.uniform4fv(uniforms.color, horizonColor);
       gl.bindBuffer(gl.ARRAY_BUFFER, horizonRef.current.buffer);
       gl.enableVertexAttribArray(posLoc);
       gl.vertexAttribPointer(posLoc, 3, gl.FLOAT, false, 0, 0);
@@ -348,8 +356,8 @@ export function useGridRenderer(
     // Draw equatorial grid (needs celestial rotation)
     if (options.showEquatorialGrid) {
       const celestialRotation = getCelestialRotationMatrix(location, date);
-      drawLines(decCirclesRef.current, [0.6, 0.3, 0.6, 0.3], celestialRotation);
-      drawLines(raCirclesRef.current, [0.6, 0.3, 0.6, 0.25], celestialRotation);
+      drawLines(decCirclesRef.current, eqColor, celestialRotation);
+      drawLines(raCirclesRef.current, eqColorDim, celestialRotation);
     }
     
   }, [canvasRef, location, date, viewRef, options]);
