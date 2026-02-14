@@ -4,6 +4,7 @@ import './Toolbar.css';
 export interface ToolbarOptions {
   showAltAzGrid: boolean;
   showEquatorialGrid: boolean;
+  showConstellations: boolean;
   showHorizon: boolean;
   showCardinals: boolean;
   lightMode: boolean;
@@ -68,6 +69,16 @@ export function Toolbar({ options, onOptionsChange }: ToolbarProps) {
               />
               <span className="option-icon">⊕</span>
               <span className="option-label">RA/Dec Grid</span>
+            </label>
+            
+            <label className="toolbar-option">
+              <input
+                type="checkbox"
+                checked={options.showConstellations}
+                onChange={() => toggle('showConstellations')}
+              />
+              <span className="option-icon">✧</span>
+              <span className="option-label">Constellations</span>
             </label>
             
             <label className="toolbar-option">

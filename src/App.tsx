@@ -21,6 +21,7 @@ function App() {
   const [toolbarOptions, setToolbarOptions] = useState<ToolbarOptions>({
     showAltAzGrid: false,
     showEquatorialGrid: false,
+    showConstellations: false,
     showHorizon: true,
     showCardinals: true,
     lightMode: false,

@@ -185,9 +185,22 @@ const IDENTITY_MATRIX = new Float32Array([
 export interface GridOptions {
   showAltAzGrid: boolean;
   showEquatorialGrid: boolean;
+  showConstellations: boolean;
   showHorizon: boolean;
   showCardinals: boolean;
   lightMode: boolean;
+}
+
+// Convert celestial coordinates (RA in degrees, Dec in degrees) to 3D cartesian
+function celestialToCartesian(raDeg: number, decDeg: number): [number, number, number] {
+  const ra = raDeg * Math.PI / 180;
+  const dec = decDeg * Math.PI / 180;
+  const cosDec = Math.cos(dec);
+  return [
+    cosDec * Math.cos(ra),
+    Math.sin(dec),
+    cosDec * Math.sin(ra)
+  ];
 }
 
 export function useGridRenderer(
@@ -211,6 +224,8 @@ export function useGridRenderer(
   const decCirclesRef = useRef<{ buffer: WebGLBuffer; count: number }[]>([]);
   const raCirclesRef = useRef<{ buffer: WebGLBuffer; count: number }[]>([]);
   const horizonRef = useRef<{ buffer: WebGLBuffer; count: number } | null>(null);
+  const constellationLinesRef = useRef<{ buffer: WebGLBuffer; count: number }[]>([]);
+  const constellationsLoadedRef = useRef(false);
 
   // Initialize
   useEffect(() => {
@@ -283,6 +298,38 @@ export function useGridRenderer(
       return { buffer, count: vertices.length / 3 };
     });
     
+    // Load constellation data
+    fetch(`${import.meta.env.BASE_URL}data/constellations.json`)
+      .then(res => res.json())
+      .then(data => {
+        if (!gl || constellationsLoadedRef.current) return;
+        
+        const lines: { buffer: WebGLBuffer; count: number }[] = [];
+        
+        for (const feature of data.features) {
+          if (feature.geometry.type === 'MultiLineString') {
+            for (const lineCoords of feature.geometry.coordinates) {
+              const vertices: number[] = [];
+              for (const coord of lineCoords) {
+                // coord is [ra_deg, dec_deg]
+                const [x, y, z] = celestialToCartesian(coord[0], coord[1]);
+                vertices.push(x, y, z);
+              }
+              
+              const buffer = gl.createBuffer()!;
+              gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+              gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
+              lines.push({ buffer, count: vertices.length / 3 });
+            }
+          }
+        }
+        
+        constellationLinesRef.current = lines;
+        constellationsLoadedRef.current = true;
+        console.log(`Loaded ${lines.length} constellation line segments`);
+      })
+      .catch(err => console.error('Failed to load constellations:', err));
+    
     return () => {
       gl.deleteProgram(program);
       gl.deleteShader(vs);
@@ -291,6 +338,7 @@ export function useGridRenderer(
       azArcsRef.current.forEach(c => gl.deleteBuffer(c.buffer));
       decCirclesRef.current.forEach(c => gl.deleteBuffer(c.buffer));
       raCirclesRef.current.forEach(c => gl.deleteBuffer(c.buffer));
+      constellationLinesRef.current.forEach(c => gl.deleteBuffer(c.buffer));
       if (horizonRef.current) gl.deleteBuffer(horizonRef.current.buffer);
     };
   }, [canvasRef]);
@@ -302,7 +350,7 @@ export function useGridRenderer(
     const canvas = canvasRef.current;
     
     if (!gl || !program || !uniforms || !canvas) return;
-    if (!options.showAltAzGrid && !options.showEquatorialGrid && !options.showHorizon) return;
+    if (!options.showAltAzGrid && !options.showEquatorialGrid && !options.showHorizon && !options.showConstellations) return;
     
     gl.useProgram(program);
     gl.bindVertexArray(null); // Unbind any VAO to avoid corrupting star renderer's VAO
@@ -359,6 +407,13 @@ export function useGridRenderer(
       const celestialRotation = getCelestialRotationMatrix(location, date);
       drawLines(decCirclesRef.current, eqColor, celestialRotation);
       drawLines(raCirclesRef.current, eqColorDim, celestialRotation);
+    }
+    
+    // Draw constellation lines (needs celestial rotation)
+    if (options.showConstellations && constellationLinesRef.current.length > 0) {
+      const celestialRotation = getCelestialRotationMatrix(location, date);
+      const constColor = options.lightMode ? [0.3, 0.3, 0.5, 0.6] : [0.4, 0.6, 0.8, 0.5];
+      drawLines(constellationLinesRef.current, constColor, celestialRotation);
     }
     
   }, [canvasRef, location, date, viewRef, options]);
