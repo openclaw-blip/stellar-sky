@@ -6,6 +6,7 @@
 import { useCallback, useEffect, useRef } from 'react';
 import type { GeoLocation } from '../utils/astronomy';
 import { getCelestialRotationMatrix } from '../utils/astronomy';
+import { calculateConstellationCenters, type ConstellationCenter } from '../utils/constellationNames';
 
 const vertexShaderSource = `#version 300 es
 precision highp float;
@@ -226,6 +227,7 @@ export function useGridRenderer(
   const horizonRef = useRef<{ buffer: WebGLBuffer; count: number } | null>(null);
   const constellationLinesRef = useRef<{ buffer: WebGLBuffer; count: number }[]>([]);
   const constellationsLoadedRef = useRef(false);
+  const constellationCentersRef = useRef<ConstellationCenter[]>([]);
 
   // Initialize
   useEffect(() => {
@@ -325,8 +327,10 @@ export function useGridRenderer(
         }
         
         constellationLinesRef.current = lines;
+        constellationCentersRef.current = calculateConstellationCenters(data.features);
         constellationsLoadedRef.current = true;
-        console.log(`Loaded ${lines.length} constellation line segments`);
+        console.log(`Loaded ${lines.length} constellation line segments, ${constellationCentersRef.current.length} constellations`);
+        console.log('Sample centers:', constellationCentersRef.current.slice(0, 3));
       })
       .catch(err => console.error('Failed to load constellations:', err));
     
@@ -418,5 +422,87 @@ export function useGridRenderer(
     
   }, [canvasRef, location, date, viewRef, options]);
 
-  return { render };
+  // Get visible constellation labels with screen positions
+  const getConstellationLabels = useCallback(() => {
+    const canvas = canvasRef.current;
+    const currentView = viewRef.current || { yaw: 0, pitch: 0 };
+    
+    if (!canvas || constellationCentersRef.current.length === 0) {
+      return [];
+    }
+    
+    const aspect = canvas.width / canvas.height;
+    const fov = 60;
+    const dpr = window.devicePixelRatio || 1;
+    
+    // Build the same matrices used in render()
+    const projection = createProjectionMatrix(fov, aspect);
+    const view = createViewMatrix(currentView.yaw, currentView.pitch);
+    const viewProjection = multiplyMatrices(projection, view);
+    const celestialRotation = getCelestialRotationMatrix(location, date);
+    
+    // Combined matrix: viewProjection * celestialRotation
+    const mvp = multiplyMatrices(viewProjection, celestialRotation);
+    
+    const labels: Array<{
+      name: string;
+      x: number;
+      y: number;
+      distance: number;
+    }> = [];
+    
+    for (const constellation of constellationCentersRef.current) {
+      const cx = constellation.x;
+      const cy = constellation.y;
+      const cz = constellation.z;
+      
+      // Transform through combined MVP matrix (column-major)
+      const clipX = mvp[0] * cx + mvp[4] * cy + mvp[8] * cz + mvp[12];
+      const clipY = mvp[1] * cx + mvp[5] * cy + mvp[9] * cz + mvp[13];
+      const clipW = mvp[3] * cx + mvp[7] * cy + mvp[11] * cz + mvp[15];
+      
+      // Behind camera?
+      if (clipW <= 0.01) continue;
+      
+      // Perspective divide -> NDC
+      const ndcX = clipX / clipW;
+      const ndcY = clipY / clipW;
+      
+      // NDC to pixel coordinates
+      const pixelX = (ndcX + 1) * 0.5 * canvas.width;
+      const pixelY = (1 - ndcY) * 0.5 * canvas.height;
+      
+      // CSS coordinates
+      const cssX = pixelX / dpr;
+      const cssY = pixelY / dpr;
+      const cssWidth = canvas.width / dpr;
+      const cssHeight = canvas.height / dpr;
+      
+      // Distance from center (normalized)
+      const distX = (cssX - cssWidth / 2) / (cssWidth / 2);
+      const distY = (cssY - cssHeight / 2) / (cssHeight / 2);
+      const distance = Math.sqrt(distX * distX + distY * distY);
+      
+      // Offset to appear adjacent to constellation
+      const labelX = cssX + 15;
+      const labelY = cssY + 20;
+      
+      // On screen?
+      if (labelX >= -50 && labelX <= cssWidth + 50 && 
+          labelY >= -50 && labelY <= cssHeight + 50 &&
+          distance < 1.8) {
+        labels.push({
+          name: constellation.name,
+          x: labelX,
+          y: labelY,
+          distance,
+        });
+      }
+    }
+    
+    labels.sort((a, b) => a.distance - b.distance);
+    return labels.slice(0, 10);
+  }, [canvasRef, location, date, viewRef]);
+
+  return { render, getConstellationLabels };
 }

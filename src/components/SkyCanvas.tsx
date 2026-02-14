@@ -5,6 +5,13 @@ import type { StarData } from '../utils/starLoader';
 import { azimuthToCardinal, type GeoLocation } from '../utils/astronomy';
 import './SkyCanvas.css';
 
+interface ConstellationLabel {
+  name: string;
+  x: number;
+  y: number;
+  distance: number;
+}
+
 interface SkyCanvasProps {
   starData: StarData | null;
   location: GeoLocation;
@@ -19,6 +26,7 @@ export function SkyCanvas({ starData, location, date, gridOptions, onViewChange 
   
   const [isDragging, setIsDragging] = useState(false);
   const [viewState, setViewState] = useState({ yaw: 0, pitch: Math.PI / 4 });
+  const [constellationLabels, setConstellationLabels] = useState<ConstellationLabel[]>([]);
   const lastMouseRef = useRef({ x: 0, y: 0 });
   const viewRef = useRef({ yaw: 0, pitch: Math.PI / 4 }); // Start looking at 45° altitude
   
@@ -30,7 +38,7 @@ export function SkyCanvas({ starData, location, date, gridOptions, onViewChange 
     { lightMode: gridOptions.lightMode }
   );
   
-  const { render: renderGrid } = useGridRenderer(
+  const { render: renderGrid, getConstellationLabels } = useGridRenderer(
     canvasRef,
     location,
     date,
@@ -57,16 +65,26 @@ export function SkyCanvas({ starData, location, date, gridOptions, onViewChange 
   // Animation loop for smooth updates
   useEffect(() => {
     let frameId: number;
+    let lastLabelUpdate = 0;
     
-    const animate = () => {
+    const animate = (time: number) => {
       renderStars();
       renderGrid();
+      
+      // Update constellation labels less frequently (every 100ms)
+      if (gridOptions.showConstellations && time - lastLabelUpdate > 100) {
+        setConstellationLabels(getConstellationLabels());
+        lastLabelUpdate = time;
+      } else if (!gridOptions.showConstellations && constellationLabels.length > 0) {
+        setConstellationLabels([]);
+      }
+      
       frameId = requestAnimationFrame(animate);
     };
     
     frameId = requestAnimationFrame(animate);
     return () => cancelAnimationFrame(frameId);
-  }, [renderStars, renderGrid]);
+  }, [renderStars, renderGrid, getConstellationLabels, gridOptions.showConstellations, constellationLabels.length]);
 
   // Mouse drag for view rotation
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
@@ -149,6 +167,35 @@ export function SkyCanvas({ starData, location, date, gridOptions, onViewChange 
       onTouchEnd={handleTouchEnd}
     >
       <canvas ref={canvasRef} className="sky-canvas" />
+      
+      {/* Constellation labels */}
+      {gridOptions.showConstellations && constellationLabels.map((label, i) => {
+        // Fade in as constellation approaches center (distance 0 = center, 1 = edge)
+        // Start fading in at distance 0.8, fully visible at 0.3
+        const fadeStart = 0.9;
+        const fadeEnd = 0.35;
+        const opacity = label.distance >= fadeStart 
+          ? 0 
+          : label.distance <= fadeEnd 
+            ? 1 
+            : 1 - (label.distance - fadeEnd) / (fadeStart - fadeEnd);
+        
+        if (opacity <= 0.05) return null;
+        
+        return (
+          <div
+            key={`${label.name}-${i}`}
+            className="constellation-label"
+            style={{
+              left: label.x,
+              top: label.y,
+              opacity,
+            }}
+          >
+            {label.name}
+          </div>
+        );
+      })}
       
       {/* Compass overlay */}
       <div className="compass-overlay">
