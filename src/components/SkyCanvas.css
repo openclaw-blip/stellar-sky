@@ -87,6 +87,57 @@
   letter-spacing: 0.5px;
 }
 
+/* Selection reticule */
+.star-reticule {
+  position: absolute;
+  width: 24px;
+  height: 24px;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: 50;
+}
+
+.reticule-corner {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  border-color: var(--accent);
+  border-style: solid;
+  border-width: 0;
+}
+
+.reticule-corner.tl {
+  top: 0;
+  left: 0;
+  border-top-width: 1px;
+  border-left-width: 1px;
+}
+
+.reticule-corner.tr {
+  top: 0;
+  right: 0;
+  border-top-width: 1px;
+  border-right-width: 1px;
+}
+
+.reticule-corner.bl {
+  bottom: 0;
+  left: 0;
+  border-bottom-width: 1px;
+  border-left-width: 1px;
+}
+
+.reticule-corner.br {
+  bottom: 0;
+  right: 0;
+  border-bottom-width: 1px;
+  border-right-width: 1px;
+}
+
+.light-mode .reticule-corner {
+  border-color: var(--accent);
+}
+
 /* Mobile */
 @media (max-width: 640px) {
   .constellation-label {

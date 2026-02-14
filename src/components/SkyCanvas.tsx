@@ -29,8 +29,11 @@ export function SkyCanvas({ starData, location, date, gridOptions, onViewChange 
   const [viewState, setViewState] = useState({ yaw: 0, pitch: Math.PI / 4 });
   const [constellationLabels, setConstellationLabels] = useState<ConstellationLabel[]>([]);
   const [hoveredStar, setHoveredStar] = useState<Star | null>(null);
+  const [selectedStar, setSelectedStar] = useState<Star | null>(null);
+  const [selectedStarScreenPos, setSelectedStarScreenPos] = useState<{x: number, y: number} | null>(null);
   const lastMouseRef = useRef({ x: 0, y: 0 });
   const mousePositionRef = useRef({ x: 0, y: 0 });
+  const didDragRef = useRef(false);
   const viewRef = useRef({ yaw: 0, pitch: Math.PI / 4 }); // Start looking at 45° altitude
   
   const { render: renderStars, setView, handleResize } = useSkyRenderer(
@@ -48,6 +51,56 @@ export function SkyCanvas({ starData, location, date, gridOptions, onViewChange 
     viewRef,
     gridOptions
   );
+
+  // Project star to screen coordinates
+  const projectStarToScreen = useCallback((star: Star): {x: number, y: number} | null => {
+    const canvas = canvasRef.current;
+    if (!canvas) return null;
+    
+    const dpr = window.devicePixelRatio || 1;
+    const fov = 60;
+    const aspect = canvas.width / canvas.height;
+    
+    // Get celestial rotation
+    const celestialRotation = getCelestialRotationMatrix(location, date);
+    
+    // Transform star position to observer frame
+    const rx = celestialRotation[0] * star.x + celestialRotation[4] * star.y + celestialRotation[8] * star.z;
+    const ry = celestialRotation[1] * star.x + celestialRotation[5] * star.y + celestialRotation[9] * star.z;
+    const rz = celestialRotation[2] * star.x + celestialRotation[6] * star.y + celestialRotation[10] * star.z;
+    
+    // Apply view rotation
+    const yaw = viewRef.current.yaw;
+    const pitch = viewRef.current.pitch;
+    const cy = Math.cos(yaw), sy = Math.sin(yaw);
+    const cp = Math.cos(pitch), sp = Math.sin(pitch);
+    
+    const vx = cy * rx + sy * rz;
+    const vy = sy * sp * rx + cp * ry - cy * sp * rz;
+    const vz = -sy * cp * rx + sp * ry + cy * cp * rz;
+    
+    // Behind camera?
+    if (vz <= 0.01) return null;
+    
+    // Project to screen
+    const f = 1.0 / Math.tan((fov * Math.PI / 180) / 2);
+    const screenX = (f / aspect) * (vx / vz);
+    const screenY = f * (vy / vz);
+    
+    // Convert to CSS pixels
+    const cssX = ((screenX + 1) * 0.5 * canvas.width) / dpr;
+    const cssY = ((1 - screenY) * 0.5 * canvas.height) / dpr;
+    
+    const rect = canvasRef.current?.getBoundingClientRect();
+    if (!rect) return null;
+    
+    // Check if on screen
+    if (cssX < 0 || cssX > rect.width || cssY < 0 || cssY > rect.height) {
+      return null;
+    }
+    
+    return { x: cssX, y: cssY };
+  }, [location, date]);
 
   // Initial setup and resize handling
   useEffect(() => {
@@ -80,16 +133,22 @@ export function SkyCanvas({ starData, location, date, gridOptions, onViewChange 
         setConstellationLabels([]);
       }
       
+      // Update selected star position
+      if (selectedStar) {
+        setSelectedStarScreenPos(projectStarToScreen(selectedStar));
+      }
+      
       frameId = requestAnimationFrame(animate);
     };
     
     frameId = requestAnimationFrame(animate);
     return () => cancelAnimationFrame(frameId);
-  }, [renderStars, renderGrid, getConstellationLabels, gridOptions.showConstellations, constellationLabels.length]);
+  }, [renderStars, renderGrid, getConstellationLabels, gridOptions.showConstellations, constellationLabels.length, selectedStar, projectStarToScreen]);
 
   // Mouse drag for view rotation
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
     setIsDragging(true);
+    didDragRef.current = false;
     lastMouseRef.current = { x: e.clientX, y: e.clientY };
   }, []);
 
@@ -166,6 +225,12 @@ export function SkyCanvas({ starData, location, date, gridOptions, onViewChange 
     if (isDragging) {
       const dx = e.clientX - lastMouseRef.current.x;
       const dy = e.clientY - lastMouseRef.current.y;
+      
+      // Mark as dragged if moved more than a few pixels
+      if (Math.abs(dx) > 3 || Math.abs(dy) > 3) {
+        didDragRef.current = true;
+      }
+      
       lastMouseRef.current = { x: e.clientX, y: e.clientY };
       
       // Update view angles
@@ -187,9 +252,21 @@ export function SkyCanvas({ starData, location, date, gridOptions, onViewChange 
     }
   }, [isDragging, setView, onViewChange, findStarAtPosition]);
 
-  const handleMouseUp = useCallback(() => {
+  const handleMouseUp = useCallback((e: React.MouseEvent) => {
     setIsDragging(false);
-  }, []);
+    
+    // If it was a click (not a drag), select/deselect star
+    if (!didDragRef.current) {
+      const star = findStarAtPosition(e.clientX, e.clientY);
+      if (star) {
+        setSelectedStar(star);
+        setSelectedStarScreenPos(projectStarToScreen(star));
+      } else {
+        setSelectedStar(null);
+        setSelectedStarScreenPos(null);
+      }
+    }
+  }, [findStarAtPosition, projectStarToScreen]);
 
   const handleMouseLeave = useCallback(() => {
     setIsDragging(false);
@@ -281,7 +358,23 @@ export function SkyCanvas({ starData, location, date, gridOptions, onViewChange 
       </div>
       
       {/* Star info panel */}
-      <StarInfo star={hoveredStar} />
+      <StarInfo star={hoveredStar || selectedStar} />
+      
+      {/* Selection reticule */}
+      {selectedStar && selectedStarScreenPos && (
+        <div 
+          className="star-reticule"
+          style={{
+            left: selectedStarScreenPos.x,
+            top: selectedStarScreenPos.y,
+          }}
+        >
+          <div className="reticule-corner tl" />
+          <div className="reticule-corner tr" />
+          <div className="reticule-corner bl" />
+          <div className="reticule-corner br" />
+        </div>
+      )}
     </div>
   );
 }
