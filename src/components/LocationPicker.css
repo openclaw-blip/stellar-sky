@@ -3,75 +3,91 @@
 }
 
 .location-button {
-  padding: 8px 16px;
-  background: rgba(0, 0, 0, 0.6);
-  border: 1px solid rgba(0, 0, 0, 0.3);
-  border-radius: 6px;
-  color: white;
-  font-size: 14px;
+  padding: 10px 18px;
+  background: var(--ui-bg);
+  border: 1px solid var(--ui-border);
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: 0.5px;
   cursor: pointer;
   transition: all 0.2s;
-  backdrop-filter: blur(4px);
+  backdrop-filter: blur(8px);
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%);
 }
 
 .location-button:hover {
-  background: rgba(0, 0, 0, 0.75);
+  background: rgba(0, 200, 255, 0.15);
+  border-color: var(--accent);
+  box-shadow: 0 0 15px rgba(0, 200, 255, 0.2);
 }
 
-.light-mode .location-button {
-  background: rgba(0, 0, 0, 0.75);
-  border-color: rgba(0, 0, 0, 0.4);
-}
-
-.light-mode .location-button:hover {
-  background: rgba(0, 0, 0, 0.85);
+.location-button::before {
+  content: '◎ ';
+  color: var(--accent);
 }
 
 .location-modal-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.7);
+  background: rgba(0, 8, 16, 0.85);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1000;
+  backdrop-filter: blur(4px);
 }
 
 .location-modal {
-  background: #1a1a2e;
-  border-radius: 12px;
-  padding: 20px;
+  background: linear-gradient(180deg, rgba(0, 20, 40, 0.98) 0%, rgba(0, 10, 25, 0.98) 100%);
+  border: 1px solid var(--ui-border);
+  padding: 24px;
   width: 90%;
   max-width: 500px;
   max-height: 90vh;
   overflow-y: auto;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  box-shadow: 
+    0 0 40px rgba(0, 200, 255, 0.15),
+    0 20px 60px rgba(0, 0, 0, 0.5);
+  clip-path: polygon(0 0, calc(100% - 15px) 0, 100% 15px, 100% 100%, 15px 100%, 0 calc(100% - 15px));
 }
 
 .location-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 16px;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--ui-border);
 }
 
 .location-header h3 {
   margin: 0;
-  color: white;
-  font-size: 18px;
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--accent);
 }
 
 .close-button {
   background: none;
-  border: none;
-  color: white;
-  font-size: 24px;
+  border: 1px solid var(--ui-border);
+  width: 32px;
+  height: 32px;
+  color: var(--text-secondary);
+  font-size: 18px;
   cursor: pointer;
-  opacity: 0.7;
+  transition: all 0.2s;
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 4px), calc(100% - 4px) 100%, 0 100%);
 }
 
 .close-button:hover {
-  opacity: 1;
+  background: rgba(255, 60, 60, 0.2);
+  border-color: #ff4444;
+  color: #ff4444;
 }
 
 .world-map {
@@ -79,20 +95,19 @@
   width: 100%;
   height: 200px;
   background: linear-gradient(180deg, 
-    #1a3a5c 0%, 
-    #2a5a4c 30%, 
-    #3a6a3c 50%,
-    #2a5a4c 70%,
-    #1a3a5c 100%
+    rgba(0, 40, 80, 0.8) 0%, 
+    rgba(0, 60, 60, 0.8) 30%, 
+    rgba(0, 80, 60, 0.8) 50%,
+    rgba(0, 60, 60, 0.8) 70%,
+    rgba(0, 40, 80, 0.8) 100%
   );
-  border-radius: 8px;
+  border: 1px solid var(--ui-border);
   cursor: crosshair;
   margin-bottom: 16px;
   overflow: hidden;
   
-  /* Simple continent shapes using box shadows */
   background-image: 
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 360 180'%3E%3Cpath fill='%23355e3b' opacity='0.6' d='M80 40 Q100 30 120 35 L130 50 Q125 70 110 75 L90 65 Q75 55 80 40 M140 45 Q160 35 180 40 L200 55 Q210 70 200 85 L180 95 Q160 100 140 90 L130 75 Q125 55 140 45 M220 30 Q260 25 300 35 L320 50 Q340 70 330 90 L300 100 Q260 105 230 95 L210 80 Q200 50 220 30 M250 100 Q270 95 290 100 L310 115 Q320 135 310 150 L280 160 Q250 165 230 150 L220 130 Q230 110 250 100 M100 100 Q130 90 150 100 L160 120 Q155 140 140 150 L110 155 Q85 150 80 135 L85 115 Q90 105 100 100'/%3E%3C/svg%3E");
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 360 180'%3E%3Cpath fill='%23004466' opacity='0.6' d='M80 40 Q100 30 120 35 L130 50 Q125 70 110 75 L90 65 Q75 55 80 40 M140 45 Q160 35 180 40 L200 55 Q210 70 200 85 L180 95 Q160 100 140 90 L130 75 Q125 55 140 45 M220 30 Q260 25 300 35 L320 50 Q340 70 330 90 L300 100 Q260 105 230 95 L210 80 Q200 50 220 30 M250 100 Q270 95 290 100 L310 115 Q320 135 310 150 L280 160 Q250 165 230 150 L220 130 Q230 110 250 100 M100 100 Q130 90 150 100 L160 120 Q155 140 140 150 L110 155 Q85 150 80 135 L85 115 Q90 105 100 100'/%3E%3C/svg%3E");
   background-size: cover;
 }
 
@@ -100,11 +115,11 @@
   position: absolute;
   width: 16px;
   height: 16px;
-  background: #ff4444;
+  background: var(--accent);
   border: 2px solid white;
   border-radius: 50%;
   transform: translate(-50%, -50%);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 0 15px rgba(0, 200, 255, 0.6);
   pointer-events: none;
 }
 
@@ -118,68 +133,88 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
 }
 
 .coord-field label {
-  color: rgba(255, 255, 255, 0.7);
-  font-size: 12px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--text-secondary);
 }
 
 .coord-field input {
-  padding: 8px 12px;
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 4px;
-  color: white;
-  font-size: 14px;
+  padding: 10px 12px;
+  background: rgba(0, 200, 255, 0.05);
+  border: 1px solid var(--ui-border);
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: 13px;
 }
 
 .coord-field input:focus {
   outline: none;
-  border-color: #4a9eff;
+  border-color: var(--accent);
+  box-shadow: 0 0 10px rgba(0, 200, 255, 0.2);
 }
 
 .apply-button {
-  padding: 8px 16px;
-  background: #4a9eff;
+  padding: 10px 20px;
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dim) 100%);
   border: none;
-  border-radius: 4px;
   color: white;
-  font-size: 14px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 1px;
+  text-transform: uppercase;
   cursor: pointer;
   align-self: flex-end;
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 4px), calc(100% - 4px) 100%, 0 100%);
+  transition: all 0.2s;
 }
 
 .apply-button:hover {
-  background: #3a8eef;
+  box-shadow: 0 0 20px rgba(0, 200, 255, 0.4);
 }
 
 .my-location-button {
   width: 100%;
-  padding: 10px;
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 6px;
-  color: white;
-  font-size: 14px;
+  padding: 12px;
+  background: rgba(0, 200, 255, 0.1);
+  border: 1px solid var(--ui-border);
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.5px;
   cursor: pointer;
   margin-bottom: 16px;
+  transition: all 0.2s;
 }
 
 .my-location-button:hover {
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(0, 200, 255, 0.2);
+  border-color: var(--accent);
+}
+
+.my-location-button::before {
+  content: '⊕ ';
+  color: var(--accent);
 }
 
 .presets {
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-top: 1px solid var(--ui-border);
   padding-top: 16px;
 }
 
 .presets-label {
-  color: rgba(255, 255, 255, 0.6);
-  font-size: 12px;
-  margin-bottom: 8px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  margin-bottom: 10px;
 }
 
 .preset-grid {
@@ -189,17 +224,19 @@
 }
 
 .preset-button {
-  padding: 6px 12px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  border-radius: 4px;
-  color: rgba(255, 255, 255, 0.8);
-  font-size: 12px;
+  padding: 8px 14px;
+  background: rgba(0, 200, 255, 0.05);
+  border: 1px solid var(--ui-border);
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: 11px;
   cursor: pointer;
   transition: all 0.2s;
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 3px), calc(100% - 3px) 100%, 0 100%);
 }
 
 .preset-button:hover {
-  background: rgba(255, 255, 255, 0.15);
-  color: white;
+  background: rgba(0, 200, 255, 0.15);
+  border-color: var(--accent);
+  color: var(--accent);
 }

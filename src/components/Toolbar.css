@@ -8,73 +8,83 @@
 }
 
 .toolbar-toggle {
-  width: 32px;
-  height: 32px;
-  background: rgba(0, 0, 0, 0.7);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 6px;
-  color: white;
-  font-size: 12px;
+  width: 36px;
+  height: 36px;
+  background: var(--ui-bg);
+  border: 1px solid var(--ui-border);
+  color: var(--accent);
+  font-size: 14px;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: all 0.2s;
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%);
 }
 
 .toolbar-toggle:hover {
-  background: rgba(0, 0, 0, 0.85);
-}
-
-.light-mode .toolbar-toggle {
-  background: rgba(0, 0, 0, 0.8);
-  border-color: rgba(0, 0, 0, 0.3);
+  background: rgba(0, 200, 255, 0.15);
+  border-color: var(--accent);
+  box-shadow: 0 0 15px rgba(0, 200, 255, 0.2);
 }
 
 .toolbar-content {
-  margin-left: 8px;
-  background: rgba(0, 0, 0, 0.7);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  border-radius: 8px;
-  padding: 12px;
-  backdrop-filter: blur(8px);
-  min-width: 180px;
-}
-
-.light-mode .toolbar-content {
-  background: rgba(0, 0, 0, 0.8);
-  border-color: rgba(0, 0, 0, 0.3);
+  margin-left: 10px;
+  background: var(--ui-bg);
+  border: 1px solid var(--ui-border);
+  padding: 16px;
+  backdrop-filter: blur(12px);
+  min-width: 200px;
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%);
+  box-shadow: 
+    0 0 20px rgba(0, 200, 255, 0.1),
+    inset 0 0 30px rgba(0, 200, 255, 0.03);
 }
 
 .toolbar-section {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
+}
+
+.toolbar-section + .toolbar-section {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--ui-border);
 }
 
 .toolbar-section-title {
-  font-size: 11px;
+  font-family: var(--font-display);
+  font-size: 10px;
+  font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 1px;
-  color: rgba(255, 255, 255, 0.5);
-  margin-bottom: 4px;
-  padding-bottom: 6px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  letter-spacing: 2px;
+  color: var(--accent);
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.toolbar-section-title::before {
+  content: '//';
+  opacity: 0.5;
 }
 
 .toolbar-option {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   cursor: pointer;
-  padding: 6px 8px;
-  margin: -6px -8px;
-  border-radius: 4px;
-  transition: background 0.15s;
+  padding: 8px 10px;
+  margin: 0 -10px;
+  transition: all 0.15s;
+  border-left: 2px solid transparent;
 }
 
 .toolbar-option:hover {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(0, 200, 255, 0.08);
+  border-left-color: var(--accent-dim);
 }
 
 .toolbar-option input[type="checkbox"] {
@@ -82,27 +92,31 @@
 }
 
 .toolbar-option input[type="checkbox"] + .option-icon {
-  width: 20px;
-  height: 20px;
+  width: 22px;
+  height: 22px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  border-radius: 4px;
-  font-size: 12px;
-  color: rgba(255, 255, 255, 0.4);
+  border: 1px solid var(--ui-border);
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.3);
   transition: all 0.15s;
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 4px), calc(100% - 4px) 100%, 0 100%);
 }
 
 .toolbar-option input[type="checkbox"]:checked + .option-icon {
-  background: #4a9eff;
-  border-color: #4a9eff;
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dim) 100%);
+  border-color: var(--accent);
   color: white;
+  box-shadow: 0 0 12px rgba(0, 200, 255, 0.4);
 }
 
 .option-label {
-  color: rgba(255, 255, 255, 0.9);
-  font-size: 13px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: 0.3px;
+  color: var(--text-primary);
 }
 
 .toolbar.collapsed .toolbar-content {
@@ -118,6 +132,6 @@
   }
   
   .toolbar-content {
-    min-width: 160px;
+    min-width: 170px;
   }
 }
