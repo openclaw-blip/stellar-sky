@@ -305,6 +305,7 @@ export function useGridRenderer(
     if (!options.showAltAzGrid && !options.showEquatorialGrid && !options.showHorizon) return;
     
     gl.useProgram(program);
+    gl.bindVertexArray(null); // Unbind any VAO to avoid corrupting star renderer's VAO
     gl.enable(gl.BLEND);
     gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
     

@@ -209,10 +209,18 @@ export function useSkyRenderer(
     // Create shaders and program
     const vs = createShader(gl, gl.VERTEX_SHADER, vertexShaderSource);
     const fs = createShader(gl, gl.FRAGMENT_SHADER, fragmentShaderSource);
-    if (!vs || !fs) return;
+    if (!vs || !fs) {
+      console.error('Failed to create star shaders');
+      return;
+    }
     
     const program = createProgram(gl, vs, fs);
-    if (!program) return;
+    if (!program) {
+      console.error('Failed to create star program');
+      return;
+    }
+    
+    console.log('Star renderer initialized successfully');
     
     // Get uniform locations
     uniformsRef.current = {
