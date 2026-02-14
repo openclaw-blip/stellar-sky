@@ -33,8 +33,9 @@ void main() {
   // Calculate point size based on magnitude
   // Brighter stars (lower magnitude) = larger points
   // Magnitude scale: -1 (very bright) to 8 (dim)
-  float brightness = pow(10.0, (0.0 - a_magnitude) / 2.5);
-  float size = u_magnitudeScale * sqrt(brightness) * u_pointScale;
+  // Use linear scale for better visibility of dim stars
+  float magNorm = clamp((8.0 - a_magnitude) / 9.0, 0.0, 1.0); // 0 for mag 8, 1 for mag -1
+  float size = u_magnitudeScale * (0.5 + magNorm * 2.5) * u_pointScale;
   
   // In light mode, make stars slightly larger for visibility
   if (u_lightMode == 1) {
@@ -42,10 +43,11 @@ void main() {
   }
   
   // Clamp size
-  gl_PointSize = clamp(size, 1.0, 30.0);
+  gl_PointSize = clamp(size, 1.5, 30.0);
   
   v_color = a_color;
-  v_brightness = min(brightness * 2.0, 1.0);
+  // Brightness for alpha: dim stars still visible, bright stars pop
+  v_brightness = 0.4 + magNorm * 0.6;
 }
 `;
 
@@ -69,13 +71,12 @@ void main() {
   
   if (u_lightMode == 1) {
     // Light mode: black stars on white background
-    float darkness = v_brightness * 0.9;
-    fragColor = vec4(0.0, 0.0, 0.0, alpha * darkness);
+    fragColor = vec4(0.0, 0.0, 0.0, alpha * v_brightness);
   } else {
     // Dark mode: colored glowing stars
-    float glow = exp(-dist * 4.0) * v_brightness;
-    vec3 color = v_color * (v_brightness + glow * 0.5);
-    fragColor = vec4(color, alpha * v_brightness);
+    float glow = exp(-dist * 3.0) * v_brightness;
+    vec3 color = v_color * (0.7 + v_brightness * 0.3 + glow * 0.3);
+    fragColor = vec4(color, alpha);
   }
 }
 `;
