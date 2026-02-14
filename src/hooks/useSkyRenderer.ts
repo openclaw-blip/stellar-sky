@@ -18,7 +18,7 @@ uniform mat4 u_viewProjection;
 uniform mat4 u_celestialRotation;
 uniform float u_pointScale;
 uniform float u_magnitudeScale;
-uniform int u_lightMode;
+uniform lowp int u_lightMode;
 
 out vec3 v_color;
 out float v_brightness;
@@ -55,7 +55,7 @@ precision highp float;
 in vec3 v_color;
 in float v_brightness;
 
-uniform int u_lightMode;
+uniform lowp int u_lightMode;
 
 out vec4 fragColor;
 
