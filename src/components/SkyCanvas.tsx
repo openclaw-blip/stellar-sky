@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { useSkyRenderer } from '../hooks/useSkyRenderer';
+import { useGridRenderer, type GridOptions } from '../hooks/useGridRenderer';
 import type { StarData } from '../utils/starLoader';
 import { azimuthToCardinal, type GeoLocation } from '../utils/astronomy';
 import './SkyCanvas.css';
@@ -8,55 +9,63 @@ interface SkyCanvasProps {
   starData: StarData | null;
   location: GeoLocation;
   date: Date;
+  gridOptions: GridOptions;
   onViewChange?: (yaw: number, pitch: number) => void;
 }
 
-export function SkyCanvas({ starData, location, date, onViewChange }: SkyCanvasProps) {
+export function SkyCanvas({ starData, location, date, gridOptions, onViewChange }: SkyCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   
   const [isDragging, setIsDragging] = useState(false);
+  const [viewState, setViewState] = useState({ yaw: 0, pitch: Math.PI / 4 });
   const lastMouseRef = useRef({ x: 0, y: 0 });
   const viewRef = useRef({ yaw: 0, pitch: Math.PI / 4 }); // Start looking at 45° altitude
   
-  const { render, setView, handleResize } = useSkyRenderer(
+  const { render: renderStars, setView, handleResize } = useSkyRenderer(
     canvasRef,
     starData,
     location,
     date
   );
+  
+  const { render: renderGrid } = useGridRenderer(
+    canvasRef,
+    location,
+    date,
+    viewRef,
+    gridOptions
+  );
 
   // Initial setup and resize handling
   useEffect(() => {
     handleResize();
-    render();
+    renderStars();
+    renderGrid();
     
     const onResize = () => {
       handleResize();
-      render();
+      renderStars();
+      renderGrid();
     };
     
     window.addEventListener('resize', onResize);
     return () => window.removeEventListener('resize', onResize);
-  }, [handleResize, render]);
-
-  // Re-render when props change
-  useEffect(() => {
-    render();
-  }, [starData, location, date, render]);
+  }, [handleResize, renderStars, renderGrid]);
 
   // Animation loop for smooth updates
   useEffect(() => {
     let frameId: number;
     
     const animate = () => {
-      render();
+      renderStars();
+      renderGrid();
       frameId = requestAnimationFrame(animate);
     };
     
     frameId = requestAnimationFrame(animate);
     return () => cancelAnimationFrame(frameId);
-  }, [render]);
+  }, [renderStars, renderGrid]);
 
   // Mouse drag for view rotation
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
@@ -80,6 +89,7 @@ export function SkyCanvas({ starData, location, date, onViewChange }: SkyCanvasP
     );
     
     setView(viewRef.current.yaw, viewRef.current.pitch);
+    setViewState({ ...viewRef.current });
     onViewChange?.(viewRef.current.yaw, viewRef.current.pitch);
   }, [isDragging, setView, onViewChange]);
 
@@ -114,6 +124,7 @@ export function SkyCanvas({ starData, location, date, onViewChange }: SkyCanvasP
     );
     
     setView(viewRef.current.yaw, viewRef.current.pitch);
+    setViewState({ ...viewRef.current });
   }, [isDragging, setView]);
 
   const handleTouchEnd = useCallback(() => {
@@ -121,8 +132,8 @@ export function SkyCanvas({ starData, location, date, onViewChange }: SkyCanvasP
   }, []);
 
   // Calculate current view direction for display
-  const viewAzimuth = (((-viewRef.current.yaw * 180 / Math.PI) % 360) + 360) % 360;
-  const viewAltitude = viewRef.current.pitch * 180 / Math.PI;
+  const viewAzimuth = (((-viewState.yaw * 180 / Math.PI) % 360) + 360) % 360;
+  const viewAltitude = viewState.pitch * 180 / Math.PI;
 
   return (
     <div 

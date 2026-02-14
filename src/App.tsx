@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { SkyCanvas } from './components/SkyCanvas';
 import { LocationPicker } from './components/LocationPicker';
 import { TimePicker } from './components/TimePicker';
+import { Toolbar, type ToolbarOptions } from './components/Toolbar';
 import { loadStarData, type StarData } from './utils/starLoader';
 import type { GeoLocation } from './utils/astronomy';
 import './App.css';
@@ -15,6 +16,14 @@ function App() {
   const [location, setLocation] = useState<GeoLocation>({ lat: 44.0582, lon: -121.3153 });
   const [date, setDate] = useState(new Date());
   const [isRealtime, setIsRealtime] = useState(true);
+  
+  // Grid/overlay options
+  const [toolbarOptions, setToolbarOptions] = useState<ToolbarOptions>({
+    showAltAzGrid: false,
+    showEquatorialGrid: false,
+    showHorizon: true,
+    showCardinals: true,
+  });
 
   // Load star data on mount
   useEffect(() => {
@@ -71,6 +80,12 @@ function App() {
         starData={starData}
         location={location}
         date={date}
+        gridOptions={toolbarOptions}
+      />
+      
+      <Toolbar
+        options={toolbarOptions}
+        onOptionsChange={setToolbarOptions}
       />
       
       <div className="controls">

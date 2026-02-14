@@ -1,0 +1,113 @@
+.toolbar {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  z-index: 100;
+  display: flex;
+  align-items: flex-start;
+}
+
+.toolbar-toggle {
+  width: 32px;
+  height: 32px;
+  background: rgba(0, 0, 0, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  color: white;
+  font-size: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.toolbar-toggle:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.toolbar-content {
+  margin-left: 8px;
+  background: rgba(0, 0, 0, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
+  padding: 12px;
+  backdrop-filter: blur(8px);
+  min-width: 180px;
+}
+
+.toolbar-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.toolbar-section-title {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: rgba(255, 255, 255, 0.5);
+  margin-bottom: 4px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.toolbar-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  padding: 6px 8px;
+  margin: -6px -8px;
+  border-radius: 4px;
+  transition: background 0.15s;
+}
+
+.toolbar-option:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.toolbar-option input[type="checkbox"] {
+  display: none;
+}
+
+.toolbar-option input[type="checkbox"] + .option-icon {
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 4px;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.4);
+  transition: all 0.15s;
+}
+
+.toolbar-option input[type="checkbox"]:checked + .option-icon {
+  background: #4a9eff;
+  border-color: #4a9eff;
+  color: white;
+}
+
+.option-label {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 13px;
+}
+
+.toolbar.collapsed .toolbar-content {
+  display: none;
+}
+
+/* Mobile */
+@media (max-width: 640px) {
+  .toolbar {
+    top: auto;
+    bottom: 60px;
+    left: 10px;
+  }
+  
+  .toolbar-content {
+    min-width: 160px;
+  }
+}
