@@ -202,10 +202,6 @@ export function SkyCanvas({ starData, location, date, gridOptions, onViewChange 
         <span className="compass-altitude">Alt: {viewAltitude.toFixed(0)}°</span>
       </div>
       
-      {/* Instructions */}
-      <div className="instructions">
-        Drag to look around
-      </div>
     </div>
   );
 }
