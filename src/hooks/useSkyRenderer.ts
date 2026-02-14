@@ -69,8 +69,9 @@ void main() {
   float alpha = 1.0 - smoothstep(0.3, 0.5, dist);
   
   if (u_lightMode == 1) {
-    // Light mode: black stars on white background
-    fragColor = vec4(0.0, 0.0, 0.0, alpha * v_brightness);
+    // Light mode: colored stars on white background (darken the colors)
+    vec3 darkColor = v_color * 0.4; // Darken for visibility on white
+    fragColor = vec4(darkColor, alpha * v_brightness);
   } else {
     // Dark mode: colored glowing stars
     float glow = exp(-dist * 3.0) * v_brightness;
