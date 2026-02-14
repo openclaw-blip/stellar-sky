@@ -21,7 +21,6 @@
   pointer-events: none;
   white-space: nowrap;
   letter-spacing: 0.5px;
-  transition: opacity 0.25s ease-out;
 }
 
 .light-mode .constellation-label {

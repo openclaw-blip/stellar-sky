@@ -65,17 +65,15 @@ export function SkyCanvas({ starData, location, date, gridOptions, onViewChange 
   // Animation loop for smooth updates
   useEffect(() => {
     let frameId: number;
-    let lastLabelUpdate = 0;
     
-    const animate = (time: number) => {
+    const animate = () => {
       renderStars();
       renderGrid();
       
-      // Update constellation labels less frequently (every 100ms)
-      if (gridOptions.showConstellations && time - lastLabelUpdate > 100) {
+      // Update constellation labels every frame for smooth tracking
+      if (gridOptions.showConstellations) {
         setConstellationLabels(getConstellationLabels());
-        lastLabelUpdate = time;
-      } else if (!gridOptions.showConstellations && constellationLabels.length > 0) {
+      } else if (constellationLabels.length > 0) {
         setConstellationLabels([]);
       }
       
