@@ -16,6 +16,7 @@
   transition: all 0.2s;
   backdrop-filter: blur(8px);
   clip-path: polygon(0 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%);
+  min-width: 200px;
 }
 
 .time-button:hover {
@@ -227,6 +228,7 @@
   .time-button {
     padding: 4px 8px;
     gap: 4px;
+    min-width: 110px;
   }
   
   .time-display {
@@ -277,6 +279,7 @@
   .time-button {
     padding: 3px 6px;
     gap: 3px;
+    min-width: 85px;
   }
   
   .time-display {
