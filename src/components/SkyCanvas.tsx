@@ -282,12 +282,9 @@ export function SkyCanvas({ starData, location, date, gridOptions, onViewChange 
     setIsDragging(false);
   }, []);
 
-  // Zoom with scroll wheel
+  // Block scroll wheel (no zoom)
   const handleWheel = useCallback((e: React.WheelEvent) => {
     e.preventDefault();
-    const zoomSpeed = 0.02;
-    const delta = e.deltaY > 0 ? 1 : -1;
-    setFov(prev => Math.max(10, Math.min(120, prev + delta * zoomSpeed * prev)));
   }, []);
 
   // Calculate current view direction for display
