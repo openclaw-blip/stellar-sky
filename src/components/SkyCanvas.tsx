@@ -172,7 +172,16 @@ export function SkyCanvas({ starData, location, date, gridOptions, onViewChange 
     
     if (isClick) {
       console.log(`🖱️ CLICK at screen (${clickX.toFixed(1)}, ${clickY.toFixed(1)})`);
-      console.log(`📐 Canvas rect: ${rect.width.toFixed(0)}x${rect.height.toFixed(0)}`);
+      console.log(`📐 Canvas rect: ${rect.width.toFixed(0)}x${rect.height.toFixed(0)}, canvas.width=${canvas.width}, dpr=${window.devicePixelRatio}`);
+      
+      // Find and log Polaris position specifically
+      const polaris = starData.stars.find(s => s.proper === 'Polaris' || s.bayer === 'Alp UMi');
+      if (polaris) {
+        const polarisPos = projectStarToScreen(polaris);
+        console.log(`🌟 Polaris (mag ${polaris.mag.toFixed(1)}): projected to ${polarisPos ? `(${polarisPos.x.toFixed(1)}, ${polarisPos.y.toFixed(1)})` : 'null (not visible)'}`);
+      } else {
+        console.log(`🌟 Polaris not found in dataset`);
+      }
     }
     
     let closestStar: Star | null = null;
