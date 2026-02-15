@@ -76,9 +76,6 @@ export function SkyCanvas({ starData, location, date, gridOptions, onViewChange 
     const cy = Math.cos(yaw), sy = Math.sin(yaw);
     const cp = Math.cos(pitch), sp = Math.sin(pitch);
     
-    // Check if above horizon (ry > 0 in observer frame)
-    if (ry < 0) return null;
-    
     const vx = cy * rx + sy * rz;
     const vy = sy * sp * rx + cp * ry - cy * sp * rz;
     const vz = -sy * cp * rx + sp * ry + cy * cp * rz;
