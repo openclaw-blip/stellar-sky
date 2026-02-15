@@ -31,6 +31,7 @@ export function SkyCanvas({ starData, location, date, gridOptions, onViewChange 
   const [hoveredStar, setHoveredStar] = useState<Star | null>(null);
   const [selectedStar, setSelectedStar] = useState<Star | null>(null);
   const [selectedStarScreenPos, setSelectedStarScreenPos] = useState<{x: number, y: number} | null>(null);
+  const [hoveredStarScreenPos, setHoveredStarScreenPos] = useState<{x: number, y: number} | null>(null);
   const lastMouseRef = useRef({ x: 0, y: 0 });
   const mousePositionRef = useRef({ x: 0, y: 0 });
   const didDragRef = useRef(false);
@@ -141,12 +142,19 @@ export function SkyCanvas({ starData, location, date, gridOptions, onViewChange 
         setSelectedStarScreenPos(projectStarToScreen(selectedStar));
       }
       
+      // Update hovered star position
+      if (hoveredStar) {
+        setHoveredStarScreenPos(projectStarToScreen(hoveredStar));
+      } else {
+        setHoveredStarScreenPos(null);
+      }
+      
       frameId = requestAnimationFrame(animate);
     };
     
     frameId = requestAnimationFrame(animate);
     return () => cancelAnimationFrame(frameId);
-  }, [renderStars, renderGrid, getConstellationLabels, gridOptions.showConstellations, constellationLabels.length, selectedStar, projectStarToScreen]);
+  }, [renderStars, renderGrid, getConstellationLabels, gridOptions.showConstellations, constellationLabels.length, selectedStar, hoveredStar, projectStarToScreen]);
 
   // Mouse drag for view rotation
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
@@ -378,10 +386,26 @@ export function SkyCanvas({ starData, location, date, gridOptions, onViewChange 
       {/* Star info panel */}
       <StarInfo star={hoveredStar || selectedStar} />
       
+      {/* Hover reticule */}
+      {hoveredStar && hoveredStarScreenPos && hoveredStar !== selectedStar && (
+        <div 
+          className="star-reticule hover"
+          style={{
+            left: hoveredStarScreenPos.x,
+            top: hoveredStarScreenPos.y,
+          }}
+        >
+          <div className="reticule-corner tl" />
+          <div className="reticule-corner tr" />
+          <div className="reticule-corner bl" />
+          <div className="reticule-corner br" />
+        </div>
+      )}
+      
       {/* Selection reticule */}
       {selectedStar && selectedStarScreenPos && (
         <div 
-          className="star-reticule"
+          className="star-reticule selected"
           style={{
             left: selectedStarScreenPos.x,
             top: selectedStarScreenPos.y,

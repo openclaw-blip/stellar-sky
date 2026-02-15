@@ -87,7 +87,7 @@
   letter-spacing: 0.5px;
 }
 
-/* Selection reticule */
+/* Star reticule */
 .star-reticule {
   position: absolute;
   width: 24px;
@@ -101,9 +101,18 @@
   position: absolute;
   width: 6px;
   height: 6px;
-  border-color: var(--accent);
   border-style: solid;
   border-width: 0;
+}
+
+/* Hover reticule - white/light color */
+.star-reticule.hover .reticule-corner {
+  border-color: rgba(255, 255, 255, 0.7);
+}
+
+/* Selected reticule - accent color */
+.star-reticule.selected .reticule-corner {
+  border-color: var(--accent);
 }
 
 .reticule-corner.tl {
