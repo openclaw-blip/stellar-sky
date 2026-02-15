@@ -182,10 +182,12 @@ export function SkyCanvas({ starData, location, date, gridOptions, onViewChange 
     const cy = Math.cos(yaw), sy = Math.sin(yaw);
     const cp = Math.cos(pitch), sp = Math.sin(pitch);
     
-    // Inverse view rotation
-    const worldRayX = cy * rayX + sy * cp * rayZ + sy * sp * rayY;
-    const worldRayY = sp * rayZ - cp * rayY;
-    const worldRayZ = -sy * rayX + cy * cp * rayZ + cy * sp * rayY;
+    // Inverse view rotation (transpose of view matrix since it's orthogonal)
+    // View matrix is: [cy, sy*sp, -sy*cp; 0, cp, sp; sy, -cy*sp, cy*cp]
+    // Inverse (transpose): [cy, 0, sy; sy*sp, cp, -cy*sp; -sy*cp, sp, cy*cp]
+    const worldRayX = cy * rayX + 0 * rayY + sy * rayZ;
+    const worldRayY = sy * sp * rayX + cp * rayY + (-cy * sp) * rayZ;
+    const worldRayZ = -sy * cp * rayX + sp * rayY + cy * cp * rayZ;
     
     // Normalize
     const len = Math.sqrt(worldRayX * worldRayX + worldRayY * worldRayY + worldRayZ * worldRayZ);
