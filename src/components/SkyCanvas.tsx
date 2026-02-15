@@ -215,7 +215,8 @@ export function SkyCanvas({ starData, location, date, gridOptions, onViewChange 
     
     // Find closest star to this direction (only consider visible stars)
     let closestStar: Star | null = null;
-    let closestDist = 0.02; // Threshold for hover detection
+    let closestDist = Infinity;
+    const baseThreshold = 0.04; // Base threshold for hover detection
     
     for (const star of starData.stars) {
       // First check if star is visible (above horizon and in front of camera)
@@ -236,7 +237,11 @@ export function SkyCanvas({ starData, location, date, gridOptions, onViewChange 
       const dz = star.z - celestialDirZ;
       const dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
       
-      if (dist < closestDist) {
+      // Brighter stars (lower magnitude) get larger hit radius
+      const magFactor = 1 + Math.max(0, (4 - star.mag) * 0.3);
+      const threshold = baseThreshold * magFactor;
+      
+      if (dist < threshold && dist < closestDist) {
         closestDist = dist;
         closestStar = star;
       }
