@@ -27,6 +27,7 @@ export function SkyCanvas({ starData, location, date, gridOptions, onViewChange 
   
   const [isDragging, setIsDragging] = useState(false);
   const [viewState, setViewState] = useState({ yaw: 0, pitch: Math.PI / 4 });
+  const [fov, setFov] = useState(60); // Field of view in degrees
   const [constellationLabels, setConstellationLabels] = useState<ConstellationLabel[]>([]);
   const [hoveredStar, setHoveredStar] = useState<Star | null>(null);
   const [selectedStar, setSelectedStar] = useState<Star | null>(null);
@@ -42,7 +43,7 @@ export function SkyCanvas({ starData, location, date, gridOptions, onViewChange 
     starData,
     location,
     date,
-    { lightMode: gridOptions.lightMode, magnitudeScale: 10, pixelStars: gridOptions.pixelStars }
+    { fov, lightMode: gridOptions.lightMode, magnitudeScale: 10, pixelStars: gridOptions.pixelStars }
   );
   
   const { render: renderGrid, getConstellationLabels } = useGridRenderer(
@@ -59,7 +60,6 @@ export function SkyCanvas({ starData, location, date, gridOptions, onViewChange 
     if (!canvas) return null;
     
     const dpr = window.devicePixelRatio || 1;
-    const fov = 60;
     const aspect = canvas.width / canvas.height;
     
     // Get celestial rotation
@@ -102,7 +102,7 @@ export function SkyCanvas({ starData, location, date, gridOptions, onViewChange 
     }
     
     return { x: cssX, y: cssY };
-  }, [location, date]);
+  }, [location, date, fov]);
 
   // Initial setup and resize handling
   useEffect(() => {
@@ -281,6 +281,14 @@ export function SkyCanvas({ starData, location, date, gridOptions, onViewChange 
     setIsDragging(false);
   }, []);
 
+  // Zoom with scroll wheel
+  const handleWheel = useCallback((e: React.WheelEvent) => {
+    e.preventDefault();
+    const zoomSpeed = 0.1;
+    const delta = e.deltaY > 0 ? 1 : -1;
+    setFov(prev => Math.max(10, Math.min(120, prev + delta * zoomSpeed * prev)));
+  }, []);
+
   // Calculate current view direction for display
   const viewAzimuth = (((-viewState.yaw * 180 / Math.PI) % 360) + 360) % 360;
   const viewAltitude = viewState.pitch * 180 / Math.PI;
@@ -296,6 +304,7 @@ export function SkyCanvas({ starData, location, date, gridOptions, onViewChange 
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
+      onWheel={handleWheel}
     >
       <canvas ref={canvasRef} className="sky-canvas" />
       
