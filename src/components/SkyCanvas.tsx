@@ -51,7 +51,8 @@ export function SkyCanvas({ starData, location, date, gridOptions, onViewChange 
     location,
     date,
     viewRef,
-    gridOptions
+    gridOptions,
+    fov
   );
 
   // Project star to screen coordinates

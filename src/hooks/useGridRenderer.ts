@@ -210,7 +210,8 @@ export function useGridRenderer(
   location: GeoLocation,
   date: Date,
   viewRef: React.RefObject<{ yaw: number; pitch: number }>,
-  options: GridOptions
+  options: GridOptions,
+  fov: number = 60
 ) {
   const glRef = useRef<WebGL2RenderingContext | null>(null);
   const programRef = useRef<WebGLProgram | null>(null);
@@ -363,7 +364,7 @@ export function useGridRenderer(
     gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
     
     const aspect = canvas.width / canvas.height;
-    const projection = createProjectionMatrix(60, aspect);
+    const projection = createProjectionMatrix(fov, aspect);
     const currentView = viewRef.current || { yaw: 0, pitch: 0 };
     const view = createViewMatrix(currentView.yaw, currentView.pitch);
     const viewProjection = multiplyMatrices(projection, view);
@@ -433,7 +434,6 @@ export function useGridRenderer(
     }
     
     const aspect = canvas.width / canvas.height;
-    const fov = 60;
     const dpr = window.devicePixelRatio || 1;
     
     // Build the same matrices used in render()
