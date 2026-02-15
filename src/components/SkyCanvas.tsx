@@ -84,9 +84,9 @@ export function SkyCanvas({ starData, location, date, gridOptions, onViewChange 
     // Note: vz sign is inverted from GPU convention, so skip behind-camera check
     // Stars behind camera will project outside screen bounds anyway
     
-    // Project to screen - trying positive X, negative Y
+    // Project to screen - X negated to match GPU projection
     const f = 1.0 / Math.tan((fov * Math.PI / 180) / 2);
-    const screenX = (f / aspect) * (vx / vz);
+    const screenX = -(f / aspect) * (vx / vz);
     const screenY = -f * (vy / vz);
     
     // Convert to CSS pixels
