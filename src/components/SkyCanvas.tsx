@@ -164,91 +164,42 @@ export function SkyCanvas({ starData, location, date, gridOptions, onViewChange 
   }, []);
 
   // Find star under cursor
+  // Find star at screen position by projecting all visible stars and finding closest
   const findStarAtPosition = useCallback((clientX: number, clientY: number): Star | null => {
     const canvas = canvasRef.current;
     if (!canvas || !starData) return null;
     
     const rect = canvas.getBoundingClientRect();
-    const dpr = window.devicePixelRatio || 1;
-    const x = (clientX - rect.left) * dpr;
-    const y = (clientY - rect.top) * dpr;
+    const clickX = clientX - rect.left;
+    const clickY = clientY - rect.top;
     
-    // Convert screen position to normalized device coordinates
-    const ndcX = (x / canvas.width) * 2 - 1;
-    const ndcY = 1 - (y / canvas.height) * 2;
-    
-    // Get view direction from NDC
-    const fov = 60;
-    const aspect = canvas.width / canvas.height;
-    const tanHalfFov = Math.tan((fov * Math.PI / 180) / 2);
-    
-    // Ray direction in view space
-    const rayX = ndcX * tanHalfFov * aspect;
-    const rayY = ndcY * tanHalfFov;
-    const rayZ = 1;
-    
-    // Transform to world space using inverse view matrix
-    const yaw = viewRef.current.yaw;
-    const pitch = viewRef.current.pitch;
-    const cy = Math.cos(yaw), sy = Math.sin(yaw);
-    const cp = Math.cos(pitch), sp = Math.sin(pitch);
-    
-    // Inverse view rotation (transpose of view matrix since it's orthogonal)
-    // View matrix columns: [cy, sy*sp, -sy*cp], [0, cp, sp], [sy, -cy*sp, cy*cp]
-    // For M^T * v, each result component is dot product of M's column with v
-    const worldRayX = cy * rayX + sy * sp * rayY + (-sy * cp) * rayZ;
-    const worldRayY = 0 * rayX + cp * rayY + sp * rayZ;
-    const worldRayZ = sy * rayX + (-cy * sp) * rayY + cy * cp * rayZ;
-    
-    // Normalize
-    const len = Math.sqrt(worldRayX * worldRayX + worldRayY * worldRayY + worldRayZ * worldRayZ);
-    const dirX = worldRayX / len;
-    const dirY = worldRayY / len;
-    const dirZ = worldRayZ / len;
-    
-    // Get inverse celestial rotation
-    const celestialRotation = getCelestialRotationMatrix(location, date);
-    // Apply inverse (transpose for orthogonal matrix)
-    const celestialDirX = celestialRotation[0] * dirX + celestialRotation[1] * dirY + celestialRotation[2] * dirZ;
-    const celestialDirY = celestialRotation[4] * dirX + celestialRotation[5] * dirY + celestialRotation[6] * dirZ;
-    const celestialDirZ = celestialRotation[8] * dirX + celestialRotation[9] * dirY + celestialRotation[10] * dirZ;
-    
-    // Find closest star to this direction (only consider visible stars)
     let closestStar: Star | null = null;
-    let closestDist = Infinity;
-    const baseThreshold = 0.04; // Base threshold for hover detection
+    let closestDistSq = Infinity;
+    const baseThreshold = 20; // pixels
     
     for (const star of starData.stars) {
-      // First check if star is visible (above horizon and in front of camera)
-      // Transform star to observer frame
-      const rx = celestialRotation[0] * star.x + celestialRotation[4] * star.y + celestialRotation[8] * star.z;
-      const ry = celestialRotation[1] * star.x + celestialRotation[5] * star.y + celestialRotation[9] * star.z;
-      const rz = celestialRotation[2] * star.x + celestialRotation[6] * star.y + celestialRotation[10] * star.z;
+      // Project star to screen using same function as reticule
+      const pos = projectStarToScreen(star);
+      if (!pos) continue; // Not visible
       
-      // Check if above horizon (ry > 0 means above horizon in observer coords)
-      if (ry < 0) continue;
+      // Distance in screen pixels
+      const dx = pos.x - clickX;
+      const dy = pos.y - clickY;
+      const distSq = dx * dx + dy * dy;
       
-      // Apply view rotation to check if in front of camera
-      const vz = -sy * cp * rx + sp * ry + cy * cp * rz;
-      if (vz <= 0) continue;
-      
-      const dx = star.x - celestialDirX;
-      const dy = star.y - celestialDirY;
-      const dz = star.z - celestialDirZ;
-      const dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
-      
-      // Brighter stars (lower magnitude) get larger hit radius
-      const magFactor = 1 + Math.max(0, (4 - star.mag) * 0.3);
+      // Brighter stars get larger hit radius
+      const magFactor = 1 + Math.max(0, (4 - star.mag) * 0.5);
       const threshold = baseThreshold * magFactor;
+      const thresholdSq = threshold * threshold;
       
-      if (dist < threshold && dist < closestDist) {
-        closestDist = dist;
+      if (distSq < thresholdSq && distSq < closestDistSq) {
+        closestDistSq = distSq;
         closestStar = star;
       }
     }
     
     return closestStar;
-  }, [starData, location, date]);
+  }, [starData, projectStarToScreen]);
 
   const handleMouseMove = useCallback((e: React.MouseEvent) => {
     mousePositionRef.current = { x: e.clientX, y: e.clientY };
