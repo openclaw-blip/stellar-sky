@@ -163,7 +163,7 @@ export function SkyCanvas({ starData, location, date, gridOptions, onViewChange 
 
   // Find star under cursor
   // Find star at screen position by projecting all visible stars and finding closest
-  const findStarAtPosition = useCallback((clientX: number, clientY: number, isClick = false): Star | null => {
+  const findStarAtPosition = useCallback((clientX: number, clientY: number): Star | null => {
     const canvas = canvasRef.current;
     if (!canvas || !starData) return null;
     
@@ -171,48 +171,14 @@ export function SkyCanvas({ starData, location, date, gridOptions, onViewChange 
     const clickX = clientX - rect.left;
     const clickY = clientY - rect.top;
     
-    if (isClick) {
-      console.log(`🖱️ CLICK at screen (${clickX.toFixed(1)}, ${clickY.toFixed(1)})`);
-      console.log(`📐 Canvas rect: ${rect.width.toFixed(0)}x${rect.height.toFixed(0)}, canvas.width=${canvas.width}, dpr=${window.devicePixelRatio}`);
-      
-      // Find and log Polaris position with full diagnostics
-      const polaris = starData.stars.find(s => s.proper === 'Polaris' || s.bayer === 'Alp UMi');
-      if (polaris) {
-        const polarisPos = projectStarToScreen(polaris);
-        console.log(`🌟 Polaris (mag ${polaris.mag.toFixed(1)}): projected to ${polarisPos ? `(${polarisPos.x.toFixed(1)}, ${polarisPos.y.toFixed(1)})` : 'null (not visible)'}`);
-        
-        // Manual diagnostic of Polaris projection
-        const celestialRotation = getCelestialRotationMatrix(location, date);
-        const rx = celestialRotation[0] * polaris.x + celestialRotation[4] * polaris.y + celestialRotation[8] * polaris.z;
-        const ry = celestialRotation[1] * polaris.x + celestialRotation[5] * polaris.y + celestialRotation[9] * polaris.z;
-        const rz = celestialRotation[2] * polaris.x + celestialRotation[6] * polaris.y + celestialRotation[10] * polaris.z;
-        const yaw = viewRef.current.yaw;
-        const pitch = viewRef.current.pitch;
-        const cy = Math.cos(yaw), sy = Math.sin(yaw);
-        const cp = Math.cos(pitch), sp = Math.sin(pitch);
-        const vx = cy * rx + sy * rz;
-        const vy = sy * sp * rx + cp * ry - cy * sp * rz;
-        const vz = -sy * cp * rx + sp * ry + cy * cp * rz;
-        console.log(`   Polaris: celestial(${polaris.x.toFixed(3)}, ${polaris.y.toFixed(3)}, ${polaris.z.toFixed(3)}) → observer(${rx.toFixed(3)}, ${ry.toFixed(3)}, ${rz.toFixed(3)}) → view(${vx.toFixed(3)}, ${vy.toFixed(3)}, ${vz.toFixed(3)})`);
-        console.log(`   View angles: yaw=${(yaw * 180 / Math.PI).toFixed(1)}°, pitch=${(pitch * 180 / Math.PI).toFixed(1)}°`);
-      } else {
-        console.log(`🌟 Polaris not found in dataset`);
-      }
-    }
-    
     let closestStar: Star | null = null;
     let closestDistSq = Infinity;
-    let closestPos: {x: number, y: number} | null = null;
-    let visibleCount = 0;
     const baseThreshold = 20; // pixels
     
     for (const star of starData.stars) {
-      // Project star to screen using same function as reticule
       const pos = projectStarToScreen(star);
-      if (!pos) continue; // Not visible
-      visibleCount++;
+      if (!pos) continue;
       
-      // Distance in screen pixels
       const dx = pos.x - clickX;
       const dy = pos.y - clickY;
       const distSq = dx * dx + dy * dy;
@@ -225,37 +191,6 @@ export function SkyCanvas({ starData, location, date, gridOptions, onViewChange 
       if (distSq < thresholdSq && distSq < closestDistSq) {
         closestDistSq = distSq;
         closestStar = star;
-        closestPos = pos;
-      }
-    }
-    
-    if (isClick) {
-      console.log(`⭐ Visible stars on screen: ${visibleCount}`);
-      if (closestStar && closestPos) {
-        console.log(`✅ Found: ${closestStar.proper || closestStar.bayer || `ID ${closestStar.id}`} (mag ${closestStar.mag.toFixed(1)})`);
-        console.log(`   Star screen pos: (${closestPos.x.toFixed(1)}, ${closestPos.y.toFixed(1)})`);
-        console.log(`   Distance: ${Math.sqrt(closestDistSq).toFixed(1)}px`);
-      } else {
-        console.log(`❌ No star found within threshold`);
-        // Log nearest star even if outside threshold
-        let nearestStar: Star | null = null;
-        let nearestDist = Infinity;
-        let nearestPos: {x: number, y: number} | null = null;
-        for (const star of starData.stars) {
-          const pos = projectStarToScreen(star);
-          if (!pos) continue;
-          const dx = pos.x - clickX;
-          const dy = pos.y - clickY;
-          const dist = Math.sqrt(dx * dx + dy * dy);
-          if (dist < nearestDist) {
-            nearestDist = dist;
-            nearestStar = star;
-            nearestPos = pos;
-          }
-        }
-        if (nearestStar && nearestPos) {
-          console.log(`   Nearest was: ${nearestStar.proper || nearestStar.bayer || `ID ${nearestStar.id}`} at (${nearestPos.x.toFixed(1)}, ${nearestPos.y.toFixed(1)}), ${nearestDist.toFixed(1)}px away`);
-        }
       }
     }
     
@@ -300,7 +235,7 @@ export function SkyCanvas({ starData, location, date, gridOptions, onViewChange 
     
     // If it was a click (not a drag), select/deselect star
     if (!didDragRef.current) {
-      const star = findStarAtPosition(e.clientX, e.clientY, true);
+      const star = findStarAtPosition(e.clientX, e.clientY);
       if (star) {
         setSelectedStar(star);
         setSelectedStarScreenPos(projectStarToScreen(star));
