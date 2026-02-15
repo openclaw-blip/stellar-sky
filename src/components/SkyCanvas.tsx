@@ -75,6 +75,9 @@ export function SkyCanvas({ starData, location, date, gridOptions, onViewChange 
     const cy = Math.cos(yaw), sy = Math.sin(yaw);
     const cp = Math.cos(pitch), sp = Math.sin(pitch);
     
+    // Check if above horizon (ry > 0 in observer frame)
+    if (ry < 0) return null;
+    
     const vx = cy * rx + sy * rz;
     const vy = sy * sp * rx + cp * ry - cy * sp * rz;
     const vz = -sy * cp * rx + sp * ry + cy * cp * rz;
@@ -202,11 +205,24 @@ export function SkyCanvas({ starData, location, date, gridOptions, onViewChange 
     const celestialDirY = celestialRotation[4] * dirX + celestialRotation[5] * dirY + celestialRotation[6] * dirZ;
     const celestialDirZ = celestialRotation[8] * dirX + celestialRotation[9] * dirY + celestialRotation[10] * dirZ;
     
-    // Find closest star to this direction
+    // Find closest star to this direction (only consider visible stars)
     let closestStar: Star | null = null;
     let closestDist = 0.02; // Threshold for hover detection
     
     for (const star of starData.stars) {
+      // First check if star is visible (above horizon and in front of camera)
+      // Transform star to observer frame
+      const rx = celestialRotation[0] * star.x + celestialRotation[4] * star.y + celestialRotation[8] * star.z;
+      const ry = celestialRotation[1] * star.x + celestialRotation[5] * star.y + celestialRotation[9] * star.z;
+      const rz = celestialRotation[2] * star.x + celestialRotation[6] * star.y + celestialRotation[10] * star.z;
+      
+      // Check if above horizon (ry > 0 means above horizon in observer coords)
+      if (ry < 0) continue;
+      
+      // Apply view rotation to check if in front of camera
+      const vz = -sy * cp * rx + sp * ry + cy * cp * rz;
+      if (vz <= 0) continue;
+      
       const dx = star.x - celestialDirX;
       const dy = star.y - celestialDirY;
       const dz = star.z - celestialDirZ;
