@@ -197,3 +197,23 @@
     font-size: 7px;
   }
 }
+
+/* Night mode */
+.night-mode .toolbar-toggle:hover {
+  background: rgba(150, 30, 30, 0.2);
+  box-shadow: 0 0 15px rgba(150, 30, 30, 0.3);
+}
+
+.night-mode .toolbar-content {
+  box-shadow: 
+    0 0 20px rgba(150, 30, 30, 0.15),
+    inset 0 0 30px rgba(150, 30, 30, 0.05);
+}
+
+.night-mode .toolbar-option:hover {
+  background: rgba(150, 30, 30, 0.15);
+}
+
+.night-mode .toolbar-option input[type="checkbox"]:checked + .option-icon {
+  box-shadow: 0 0 8px rgba(200, 50, 50, 0.4);
+}

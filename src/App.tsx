@@ -147,7 +147,7 @@ function App() {
   }
 
   return (
-    <div className={`app ${toolbarOptions.lightMode ? 'light-mode' : 'dark-mode'}`}>
+    <div className={`app ${toolbarOptions.lightMode ? 'light-mode' : 'dark-mode'} ${toolbarOptions.nightMode ? 'night-mode' : ''}`}>
       <SkyCanvas 
         starData={starData}
         location={location}

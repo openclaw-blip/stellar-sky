@@ -82,6 +82,27 @@ body {
   color: var(--text-secondary);
 }
 
+/* Night mode overrides - red for night vision preservation */
+.night-mode {
+  --ui-bg: rgba(20, 0, 0, 0.9);
+  --ui-border: rgba(150, 30, 30, 0.5);
+  --ui-glow: rgba(150, 30, 30, 0.2);
+  --accent: #cc3333;
+  --accent-dim: #882222;
+  --text-primary: rgba(200, 60, 60, 0.95);
+  --text-secondary: rgba(170, 50, 50, 0.8);
+}
+
+.night-mode body {
+  background: #0a0000;
+}
+
+.night-mode .loading-spinner {
+  border-color: rgba(150, 30, 30, 0.2);
+  border-top-color: #cc3333;
+  box-shadow: 0 0 20px rgba(150, 30, 30, 0.3);
+}
+
 /* Loading screen */
 .loading-screen {
   width: 100%;

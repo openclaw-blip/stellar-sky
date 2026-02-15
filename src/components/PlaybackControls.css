@@ -84,3 +84,17 @@
     min-width: 30px;
   }
 }
+
+/* Night mode */
+.night-mode .playback-controls {
+  box-shadow: 0 0 15px rgba(150, 30, 30, 0.2);
+}
+
+.night-mode .speed-button:hover:not(:disabled) {
+  box-shadow: 0 0 8px rgba(150, 30, 30, 0.3);
+}
+
+.night-mode .speed-button.active {
+  box-shadow: 0 0 10px rgba(200, 50, 50, 0.4);
+}
+

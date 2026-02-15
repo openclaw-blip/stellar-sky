@@ -300,3 +300,29 @@
     font-size: 7px;
   }
 }
+
+/* Night mode */
+.night-mode .location-button:hover {
+  box-shadow: 0 0 10px rgba(150, 30, 30, 0.3);
+}
+
+.night-mode .location-picker {
+  box-shadow: 0 0 30px rgba(150, 30, 30, 0.2);
+}
+
+.night-mode .world-map {
+  filter: sepia(100%) hue-rotate(-30deg) saturate(200%) brightness(0.6);
+}
+
+.night-mode .map-marker {
+  filter: hue-rotate(-50deg);
+}
+
+.night-mode .my-location-button:hover {
+  box-shadow: 0 0 10px rgba(150, 30, 30, 0.3);
+}
+
+.night-mode .preset-button:hover {
+  box-shadow: 0 0 8px rgba(150, 30, 30, 0.25);
+}
+

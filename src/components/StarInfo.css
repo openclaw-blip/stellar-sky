@@ -92,3 +92,9 @@
     font-size: 7px;
   }
 }
+
+/* Night mode */
+.night-mode .star-info-panel {
+  box-shadow: 0 0 20px rgba(150, 30, 30, 0.2);
+}
+

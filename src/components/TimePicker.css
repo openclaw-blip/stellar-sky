@@ -295,3 +295,18 @@
     padding: 1px 2px;
   }
 }
+
+/* Night mode */
+.night-mode .time-button:hover {
+  box-shadow: 0 0 10px rgba(150, 30, 30, 0.3);
+}
+
+.night-mode .time-picker {
+  box-shadow: 0 0 30px rgba(150, 30, 30, 0.2);
+}
+
+.night-mode .realtime-toggle.active {
+  background: rgba(150, 50, 50, 0.3);
+  box-shadow: 0 0 10px rgba(200, 50, 50, 0.3);
+}
+
