@@ -422,7 +422,7 @@ export function useGridRenderer(
       drawLines(constellationLinesRef.current, constColor, celestialRotation);
     }
     
-  }, [canvasRef, location, date, viewRef, options]);
+  }, [canvasRef, location, date, viewRef, options, fov]);
 
   // Get visible constellation labels with screen positions
   const getConstellationLabels = useCallback(() => {
@@ -503,7 +503,7 @@ export function useGridRenderer(
     
     labels.sort((a, b) => a.distance - b.distance);
     return labels.slice(0, 10);
-  }, [canvasRef, location, date, viewRef]);
+  }, [canvasRef, location, date, viewRef, fov]);
 
   return { render, getConstellationLabels };
 }
