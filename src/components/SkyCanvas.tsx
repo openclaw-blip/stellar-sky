@@ -27,7 +27,7 @@ export function SkyCanvas({ starData, location, date, gridOptions, onViewChange 
   
   const [isDragging, setIsDragging] = useState(false);
   const [viewState, setViewState] = useState({ yaw: 0, pitch: Math.PI / 4 });
-  const [fov, setFov] = useState(60); // Field of view in degrees
+  const [fov] = useState(60); // Field of view in degrees
   const [constellationLabels, setConstellationLabels] = useState<ConstellationLabel[]>([]);
   const [hoveredStar, setHoveredStar] = useState<Star | null>(null);
   const [selectedStar, setSelectedStar] = useState<Star | null>(null);
@@ -43,7 +43,7 @@ export function SkyCanvas({ starData, location, date, gridOptions, onViewChange 
     starData,
     location,
     date,
-    { fov, lightMode: gridOptions.lightMode, magnitudeScale: 10, pixelStars: gridOptions.pixelStars }
+    { fov, lightMode: gridOptions.lightMode, nightMode: gridOptions.nightMode, magnitudeScale: 10, pixelStars: gridOptions.pixelStars }
   );
   
   const { render: renderGrid, getConstellationLabels } = useGridRenderer(
@@ -323,11 +323,12 @@ export function SkyCanvas({ starData, location, date, gridOptions, onViewChange 
         return (
           <div
             key={`${label.name}-${i}`}
-            className="constellation-label"
+            className={`constellation-label ${gridOptions.nightMode ? 'night-mode' : ''}`}
             style={{
               left: label.x,
               top: label.y,
               opacity,
+              color: gridOptions.nightMode ? '#cc3333' : undefined,
             }}
           >
             {label.name}
@@ -336,7 +337,7 @@ export function SkyCanvas({ starData, location, date, gridOptions, onViewChange 
       })}
       
       {/* Compass overlay */}
-      <div className="compass-overlay">
+      <div className={`compass-overlay ${gridOptions.nightMode ? 'night-mode' : ''}`}>
         <span className="compass-direction">{azimuthToCardinal(viewAzimuth)}</span>
         <span className="compass-degrees">{viewAzimuth.toFixed(0)}°</span>
         <span className="compass-altitude">Alt: {viewAltitude.toFixed(0)}°</span>

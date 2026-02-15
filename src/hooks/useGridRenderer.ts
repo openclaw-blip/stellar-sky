@@ -190,6 +190,7 @@ export interface GridOptions {
   showHorizon: boolean;
   showCardinals: boolean;
   lightMode: boolean;
+  nightMode: boolean;
   pixelStars?: boolean;
 }
 
@@ -385,12 +386,29 @@ export function useGridRenderer(
       });
     };
     
-    // Colors for light vs dark mode
-    const altAzColor = options.lightMode ? [0.2, 0.4, 0.7, 0.5] : [0.3, 0.5, 0.8, 0.4];
-    const altAzColorDim = options.lightMode ? [0.2, 0.4, 0.7, 0.35] : [0.3, 0.5, 0.8, 0.3];
-    const horizonColor = options.lightMode ? [0.6, 0.3, 0.1, 0.8] : [0.8, 0.4, 0.2, 0.7];
-    const eqColor = options.lightMode ? [0.5, 0.2, 0.5, 0.4] : [0.6, 0.3, 0.6, 0.3];
-    const eqColorDim = options.lightMode ? [0.5, 0.2, 0.5, 0.3] : [0.6, 0.3, 0.6, 0.25];
+    // Colors for light vs dark vs night mode
+    let altAzColor: number[], altAzColorDim: number[], horizonColor: number[], eqColor: number[], eqColorDim: number[];
+    
+    if (options.nightMode) {
+      // Night mode: all red for night vision preservation
+      altAzColor = [0.6, 0.1, 0.1, 0.5];
+      altAzColorDim = [0.5, 0.1, 0.1, 0.35];
+      horizonColor = [0.8, 0.15, 0.1, 0.7];
+      eqColor = [0.6, 0.1, 0.1, 0.4];
+      eqColorDim = [0.5, 0.1, 0.1, 0.3];
+    } else if (options.lightMode) {
+      altAzColor = [0.2, 0.4, 0.7, 0.5];
+      altAzColorDim = [0.2, 0.4, 0.7, 0.35];
+      horizonColor = [0.6, 0.3, 0.1, 0.8];
+      eqColor = [0.5, 0.2, 0.5, 0.4];
+      eqColorDim = [0.5, 0.2, 0.5, 0.3];
+    } else {
+      altAzColor = [0.3, 0.5, 0.8, 0.4];
+      altAzColorDim = [0.3, 0.5, 0.8, 0.3];
+      horizonColor = [0.8, 0.4, 0.2, 0.7];
+      eqColor = [0.6, 0.3, 0.6, 0.3];
+      eqColorDim = [0.6, 0.3, 0.6, 0.25];
+    }
     
     // Draw Alt/Az grid (in observer frame - identity transform)
     if (options.showAltAzGrid) {
@@ -418,7 +436,8 @@ export function useGridRenderer(
     // Draw constellation lines (needs celestial rotation)
     if (options.showConstellations && constellationLinesRef.current.length > 0) {
       const celestialRotation = getCelestialRotationMatrix(location, date);
-      const constColor = options.lightMode ? [0.3, 0.3, 0.5, 0.6] : [0.4, 0.6, 0.8, 0.5];
+      const constColor = options.nightMode ? [0.8, 0.2, 0.15, 0.6] : 
+                         options.lightMode ? [0.3, 0.3, 0.5, 0.6] : [0.4, 0.6, 0.8, 0.5];
       drawLines(constellationLinesRef.current, constColor, celestialRotation);
     }
     

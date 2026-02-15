@@ -24,6 +24,7 @@ const defaultToolbarOptions: ToolbarOptions = {
   showHorizon: true,
   showCardinals: true,
   lightMode: false,
+  nightMode: false,
   pixelStars: false,
 };
 

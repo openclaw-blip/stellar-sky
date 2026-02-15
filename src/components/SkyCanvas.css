@@ -192,3 +192,29 @@
     display: none;
   }
 }
+
+/* Night mode - red for night vision preservation */
+.constellation-label.night-mode {
+  color: rgba(200, 50, 50, 0.9);
+  text-shadow: 
+    0 0 10px rgba(200, 50, 50, 0.5),
+    0 0 20px rgba(150, 30, 30, 0.3),
+    0 0 2px rgba(0, 0, 0, 1);
+}
+
+.compass-overlay.night-mode {
+  background: rgba(20, 0, 0, 0.9);
+  border-color: rgba(150, 30, 30, 0.5);
+}
+
+.compass-overlay.night-mode .compass-direction {
+  color: #cc3333;
+}
+
+.compass-overlay.night-mode .compass-degrees {
+  color: #aa2222;
+}
+
+.compass-overlay.night-mode .compass-altitude {
+  color: #882222;
+}
