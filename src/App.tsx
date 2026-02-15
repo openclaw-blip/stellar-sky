@@ -8,28 +8,69 @@ import { loadStarData, type StarData } from './utils/starLoader';
 import type { GeoLocation } from './utils/astronomy';
 import './App.css';
 
+const STORAGE_KEY = 'stellar-sky-settings';
+
+interface StoredSettings {
+  location: GeoLocation;
+  toolbarOptions: ToolbarOptions;
+}
+
+const defaultLocation: GeoLocation = { lat: 44.0582, lon: -121.3153 }; // Bend, Oregon
+
+const defaultToolbarOptions: ToolbarOptions = {
+  showAltAzGrid: false,
+  showEquatorialGrid: false,
+  showConstellations: false,
+  showHorizon: true,
+  showCardinals: true,
+  lightMode: false,
+  pixelStars: false,
+};
+
+function loadSettings(): StoredSettings {
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      return {
+        location: { ...defaultLocation, ...parsed.location },
+        toolbarOptions: { ...defaultToolbarOptions, ...parsed.toolbarOptions },
+      };
+    }
+  } catch (e) {
+    console.warn('Failed to load settings:', e);
+  }
+  return { location: defaultLocation, toolbarOptions: defaultToolbarOptions };
+}
+
+function saveSettings(settings: StoredSettings) {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
+  } catch (e) {
+    console.warn('Failed to save settings:', e);
+  }
+}
+
 function App() {
   const [starData, setStarData] = useState<StarData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   
-  // Default to Bend, Oregon
-  const [location, setLocation] = useState<GeoLocation>({ lat: 44.0582, lon: -121.3153 });
+  // Load persisted settings
+  const [initialSettings] = useState(() => loadSettings());
+  const [location, setLocation] = useState<GeoLocation>(initialSettings.location);
   const [date, setDate] = useState(new Date());
   const [isRealtime, setIsRealtime] = useState(true);
   const [playbackSpeed, setPlaybackSpeed] = useState(0); // 0 = paused/realtime, positive = forward, negative = reverse
   const lastUpdateRef = useRef(Date.now());
   
   // Grid/overlay options
-  const [toolbarOptions, setToolbarOptions] = useState<ToolbarOptions>({
-    showAltAzGrid: false,
-    showEquatorialGrid: false,
-    showConstellations: false,
-    showHorizon: true,
-    showCardinals: true,
-    lightMode: false,
-    pixelStars: false,
-  });
+  const [toolbarOptions, setToolbarOptions] = useState<ToolbarOptions>(initialSettings.toolbarOptions);
+  
+  // Persist settings when they change
+  useEffect(() => {
+    saveSettings({ location, toolbarOptions });
+  }, [location, toolbarOptions]);
 
   // Load star data on mount
   useEffect(() => {
