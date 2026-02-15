@@ -285,7 +285,7 @@ export function SkyCanvas({ starData, location, date, gridOptions, onViewChange 
   // Zoom with scroll wheel
   const handleWheel = useCallback((e: React.WheelEvent) => {
     e.preventDefault();
-    const zoomSpeed = 0.1;
+    const zoomSpeed = 0.02;
     const delta = e.deltaY > 0 ? 1 : -1;
     setFov(prev => Math.max(10, Math.min(120, prev + delta * zoomSpeed * prev)));
   }, []);
