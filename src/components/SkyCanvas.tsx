@@ -173,14 +173,20 @@ export function SkyCanvas({ starData, location, date, gridOptions, onViewChange 
     const clickX = clientX - rect.left;
     const clickY = clientY - rect.top;
     
+    console.log(`🖱️ Click at screen (${clickX.toFixed(1)}, ${clickY.toFixed(1)})`);
+    console.log(`📐 Canvas rect: ${rect.width.toFixed(0)}x${rect.height.toFixed(0)}`);
+    
     let closestStar: Star | null = null;
     let closestDistSq = Infinity;
+    let closestPos: {x: number, y: number} | null = null;
+    let visibleCount = 0;
     const baseThreshold = 20; // pixels
     
     for (const star of starData.stars) {
       // Project star to screen using same function as reticule
       const pos = projectStarToScreen(star);
       if (!pos) continue; // Not visible
+      visibleCount++;
       
       // Distance in screen pixels
       const dx = pos.x - clickX;
@@ -195,6 +201,35 @@ export function SkyCanvas({ starData, location, date, gridOptions, onViewChange 
       if (distSq < thresholdSq && distSq < closestDistSq) {
         closestDistSq = distSq;
         closestStar = star;
+        closestPos = pos;
+      }
+    }
+    
+    console.log(`⭐ Visible stars on screen: ${visibleCount}`);
+    if (closestStar && closestPos) {
+      console.log(`✅ Found: ${closestStar.proper || closestStar.bayer || `ID ${closestStar.id}`} (mag ${closestStar.mag.toFixed(1)})`);
+      console.log(`   Star screen pos: (${closestPos.x.toFixed(1)}, ${closestPos.y.toFixed(1)})`);
+      console.log(`   Distance: ${Math.sqrt(closestDistSq).toFixed(1)}px`);
+    } else {
+      console.log(`❌ No star found within threshold`);
+      // Log nearest star even if outside threshold
+      let nearestStar: Star | null = null;
+      let nearestDist = Infinity;
+      let nearestPos: {x: number, y: number} | null = null;
+      for (const star of starData.stars) {
+        const pos = projectStarToScreen(star);
+        if (!pos) continue;
+        const dx = pos.x - clickX;
+        const dy = pos.y - clickY;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < nearestDist) {
+          nearestDist = dist;
+          nearestStar = star;
+          nearestPos = pos;
+        }
+      }
+      if (nearestStar && nearestPos) {
+        console.log(`   Nearest was: ${nearestStar.proper || nearestStar.bayer || `ID ${nearestStar.id}`} at (${nearestPos.x.toFixed(1)}, ${nearestPos.y.toFixed(1)}), ${nearestDist.toFixed(1)}px away`);
       }
     }
     
