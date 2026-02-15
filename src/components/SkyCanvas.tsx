@@ -81,7 +81,8 @@ export function SkyCanvas({ starData, location, date, gridOptions, onViewChange 
     const vz = -sy * cp * rx + sp * ry + cy * cp * rz;
     
     // Behind camera?
-    if (vz <= 0.01) return null;
+    // Note: vz sign is inverted from GPU convention, so skip behind-camera check
+    // Stars behind camera will project outside screen bounds anyway
     
     // Project to screen - trying positive X, negative Y
     const f = 1.0 / Math.tan((fov * Math.PI / 180) / 2);
