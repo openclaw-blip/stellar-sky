@@ -174,11 +174,26 @@ export function SkyCanvas({ starData, location, date, gridOptions, onViewChange 
       console.log(`🖱️ CLICK at screen (${clickX.toFixed(1)}, ${clickY.toFixed(1)})`);
       console.log(`📐 Canvas rect: ${rect.width.toFixed(0)}x${rect.height.toFixed(0)}, canvas.width=${canvas.width}, dpr=${window.devicePixelRatio}`);
       
-      // Find and log Polaris position specifically
+      // Find and log Polaris position with full diagnostics
       const polaris = starData.stars.find(s => s.proper === 'Polaris' || s.bayer === 'Alp UMi');
       if (polaris) {
         const polarisPos = projectStarToScreen(polaris);
         console.log(`🌟 Polaris (mag ${polaris.mag.toFixed(1)}): projected to ${polarisPos ? `(${polarisPos.x.toFixed(1)}, ${polarisPos.y.toFixed(1)})` : 'null (not visible)'}`);
+        
+        // Manual diagnostic of Polaris projection
+        const celestialRotation = getCelestialRotationMatrix(location, date);
+        const rx = celestialRotation[0] * polaris.x + celestialRotation[4] * polaris.y + celestialRotation[8] * polaris.z;
+        const ry = celestialRotation[1] * polaris.x + celestialRotation[5] * polaris.y + celestialRotation[9] * polaris.z;
+        const rz = celestialRotation[2] * polaris.x + celestialRotation[6] * polaris.y + celestialRotation[10] * polaris.z;
+        const yaw = viewRef.current.yaw;
+        const pitch = viewRef.current.pitch;
+        const cy = Math.cos(yaw), sy = Math.sin(yaw);
+        const cp = Math.cos(pitch), sp = Math.sin(pitch);
+        const vx = cy * rx + sy * rz;
+        const vy = sy * sp * rx + cp * ry - cy * sp * rz;
+        const vz = -sy * cp * rx + sp * ry + cy * cp * rz;
+        console.log(`   Polaris: celestial(${polaris.x.toFixed(3)}, ${polaris.y.toFixed(3)}, ${polaris.z.toFixed(3)}) → observer(${rx.toFixed(3)}, ${ry.toFixed(3)}, ${rz.toFixed(3)}) → view(${vx.toFixed(3)}, ${vy.toFixed(3)}, ${vz.toFixed(3)})`);
+        console.log(`   View angles: yaw=${(yaw * 180 / Math.PI).toFixed(1)}°, pitch=${(pitch * 180 / Math.PI).toFixed(1)}°`);
       } else {
         console.log(`🌟 Polaris not found in dataset`);
       }
