@@ -4,216 +4,98 @@
   left: 20px;
   z-index: 100;
   display: flex;
-  align-items: flex-start;
-}
-
-.toolbar-toggle {
-  width: 36px;
-  height: 36px;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px;
   background: var(--ui-bg);
   border: 1px solid var(--ui-border);
-  color: var(--accent);
+  backdrop-filter: blur(12px);
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%);
+}
+
+.toolbar-btn {
+  width: 32px;
+  height: 32px;
+  background: transparent;
+  border: 1px solid var(--ui-border);
+  color: var(--text-secondary);
   font-size: 14px;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.2s;
-  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%);
-}
-
-.toolbar-toggle:hover {
-  background: rgba(0, 200, 255, 0.15);
-  border-color: var(--accent);
-  box-shadow: 0 0 15px rgba(0, 200, 255, 0.2);
-}
-
-.toolbar-content {
-  margin-left: 10px;
-  background: var(--ui-bg);
-  border: 1px solid var(--ui-border);
-  padding: 16px;
-  backdrop-filter: blur(12px);
-  min-width: 200px;
-  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%);
-  box-shadow: 
-    0 0 20px rgba(0, 200, 255, 0.1),
-    inset 0 0 30px rgba(0, 200, 255, 0.03);
-}
-
-.toolbar-section {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.toolbar-section + .toolbar-section {
-  margin-top: 16px;
-  padding-top: 16px;
-  border-top: 1px solid var(--ui-border);
-}
-
-.toolbar-section-title {
-  font-family: var(--font-display);
-  font-size: 10px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 2px;
-  color: var(--accent);
-  margin-bottom: 8px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.toolbar-section-title::before {
-  content: '//';
-  opacity: 0.5;
-}
-
-.toolbar-option {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  cursor: pointer;
-  padding: 8px 10px;
-  margin: 0 -10px;
-  transition: all 0.15s;
-  border-left: 2px solid transparent;
-}
-
-.toolbar-option:hover {
-  background: rgba(0, 200, 255, 0.08);
-  border-left-color: var(--accent-dim);
-}
-
-.toolbar-option input[type="checkbox"] {
-  display: none;
-}
-
-.toolbar-option input[type="checkbox"] + .option-icon {
-  width: 22px;
-  height: 22px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid var(--ui-border);
-  font-size: 11px;
-  color: rgba(255, 255, 255, 0.3);
   transition: all 0.15s;
   clip-path: polygon(0 0, 100% 0, 100% calc(100% - 4px), calc(100% - 4px) 100%, 0 100%);
 }
 
-.toolbar-option input[type="checkbox"]:checked + .option-icon {
-  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dim) 100%);
+.toolbar-btn:hover {
+  background: rgba(0, 200, 255, 0.1);
   border-color: var(--accent);
-  color: white;
-  box-shadow: 0 0 12px rgba(0, 200, 255, 0.4);
+  color: var(--accent);
+  box-shadow: 0 0 10px rgba(0, 200, 255, 0.2);
 }
 
-.option-label {
-  font-family: var(--font-mono);
-  font-size: 12px;
-  font-weight: 400;
-  letter-spacing: 0.3px;
-  color: var(--text-primary);
+.toolbar-btn.active {
+  background: rgba(0, 200, 255, 0.2);
+  border-color: var(--accent);
+  color: var(--accent);
+  box-shadow: 0 0 12px rgba(0, 200, 255, 0.3);
 }
 
-.toolbar.collapsed .toolbar-content {
-  display: none;
+/* Light mode */
+.light-mode .toolbar-btn:hover {
+  background: rgba(0, 120, 170, 0.15);
+  box-shadow: 0 0 10px rgba(0, 120, 170, 0.2);
+}
+
+.light-mode .toolbar-btn.active {
+  background: rgba(0, 120, 170, 0.25);
+  box-shadow: 0 0 12px rgba(0, 120, 170, 0.3);
+}
+
+/* Night mode */
+.night-mode .toolbar-btn:hover {
+  background: rgba(150, 30, 30, 0.15);
+  box-shadow: 0 0 10px rgba(150, 30, 30, 0.3);
+}
+
+.night-mode .toolbar-btn.active {
+  background: rgba(150, 30, 30, 0.25);
+  box-shadow: 0 0 12px rgba(200, 50, 50, 0.4);
 }
 
 /* Mobile */
 @media (max-width: 640px) {
   .toolbar {
     top: auto;
-    bottom: 6px;
+    bottom: 80px;
     left: 6px;
-  }
-  
-  .toolbar-toggle {
-    width: 24px;
-    height: 24px;
-    font-size: 9px;
-  }
-  
-  .toolbar-content {
-    min-width: 115px;
-    padding: 6px;
-    margin-left: 0;
-    margin-bottom: 4px;
-    position: absolute;
-    bottom: 100%;
-    left: 0;
-  }
-  
-  .toolbar-section-title {
-    font-size: 7px;
-    letter-spacing: 1px;
-    margin-bottom: 4px;
-  }
-  
-  .toolbar-option {
-    padding: 3px 4px;
-    margin: 0 -4px;
+    flex-direction: row;
+    flex-wrap: wrap;
+    max-width: 120px;
+    padding: 4px;
     gap: 4px;
   }
   
-  .toolbar-option input[type="checkbox"] + .option-icon {
-    width: 14px;
-    height: 14px;
-    font-size: 7px;
-  }
-  
-  .option-label {
-    font-size: 8px;
-  }
-  
-  .toolbar-section + .toolbar-section {
-    margin-top: 6px;
-    padding-top: 6px;
+  .toolbar-btn {
+    width: 26px;
+    height: 26px;
+    font-size: 11px;
   }
 }
 
 @media (max-width: 400px) {
-  .toolbar-toggle {
+  .toolbar {
+    bottom: 70px;
+    left: 4px;
+    max-width: 100px;
+    padding: 3px;
+    gap: 3px;
+  }
+  
+  .toolbar-btn {
     width: 22px;
     height: 22px;
-    font-size: 8px;
+    font-size: 9px;
   }
-  
-  .toolbar-content {
-    min-width: 100px;
-    padding: 5px;
-  }
-  
-  .toolbar-option input[type="checkbox"] + .option-icon {
-    width: 12px;
-    height: 12px;
-    font-size: 6px;
-  }
-  
-  .option-label {
-    font-size: 7px;
-  }
-}
-
-/* Night mode */
-.night-mode .toolbar-toggle:hover {
-  background: rgba(150, 30, 30, 0.2);
-  box-shadow: 0 0 15px rgba(150, 30, 30, 0.3);
-}
-
-.night-mode .toolbar-content {
-  box-shadow: 
-    0 0 20px rgba(150, 30, 30, 0.15),
-    inset 0 0 30px rgba(150, 30, 30, 0.05);
-}
-
-.night-mode .toolbar-option:hover {
-  background: rgba(150, 30, 30, 0.15);
-}
-
-.night-mode .toolbar-option input[type="checkbox"]:checked + .option-icon {
-  box-shadow: 0 0 8px rgba(200, 50, 50, 0.4);
 }
