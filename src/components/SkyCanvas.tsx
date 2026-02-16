@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 import { useSkyRenderer } from '../hooks/useSkyRenderer';
 import { useGridRenderer, type GridOptions } from '../hooks/useGridRenderer';
 import type { StarData, Star } from '../utils/starLoader';
-import { azimuthToCardinal, getCelestialRotationMatrix, type GeoLocation } from '../utils/astronomy';
+import { azimuthToCardinal, getCelestialRotationMatrix, equatorialToHorizontal, type GeoLocation } from '../utils/astronomy';
 import { StarInfo } from './StarInfo';
 import './SkyCanvas.css';
 
@@ -13,15 +13,22 @@ interface ConstellationLabel {
   distance: number;
 }
 
+interface NavigateTarget {
+  ra: number;  // Right Ascension in hours
+  dec: number; // Declination in degrees
+}
+
 interface SkyCanvasProps {
   starData: StarData | null;
   location: GeoLocation;
   date: Date;
   gridOptions: GridOptions;
   onViewChange?: (yaw: number, pitch: number) => void;
+  navigateTarget?: NavigateTarget | null;
+  onNavigateComplete?: () => void;
 }
 
-export function SkyCanvas({ starData, location, date, gridOptions, onViewChange }: SkyCanvasProps) {
+export function SkyCanvas({ starData, location, date, gridOptions, onViewChange, navigateTarget, onNavigateComplete }: SkyCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   
@@ -281,6 +288,35 @@ export function SkyCanvas({ starData, location, date, gridOptions, onViewChange 
   const handleTouchEnd = useCallback(() => {
     setIsDragging(false);
   }, []);
+
+  // Handle navigation to celestial coordinates
+  useEffect(() => {
+    if (!navigateTarget) return;
+    
+    // Convert RA/Dec to Alt/Az for current location and time
+    const horizontal = equatorialToHorizontal(
+      { ra: navigateTarget.ra, dec: navigateTarget.dec },
+      location,
+      date
+    );
+    
+    // Convert to yaw/pitch (radians)
+    // Azimuth: 0=North, 90=East, 180=South, 270=West
+    // Our yaw: 0=North, positive=West
+    const yaw = -horizontal.az * Math.PI / 180;
+    const pitch = horizontal.alt * Math.PI / 180;
+    
+    // Clamp pitch to valid range
+    const clampedPitch = Math.max(-Math.PI / 2 + 0.01, Math.min(Math.PI / 2 - 0.01, pitch));
+    
+    // Update view
+    viewRef.current = { yaw, pitch: clampedPitch };
+    setView(yaw, clampedPitch);
+    setViewState({ yaw, pitch: clampedPitch });
+    
+    // Notify completion
+    onNavigateComplete?.();
+  }, [navigateTarget, location, date, setView, onNavigateComplete]);
 
   // Block scroll wheel (no zoom)
   const handleWheel = useCallback((e: React.WheelEvent) => {

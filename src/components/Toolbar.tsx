@@ -14,6 +14,7 @@ export interface ToolbarOptions {
 interface ToolbarProps {
   options: ToolbarOptions;
   onOptionsChange: (options: ToolbarOptions) => void;
+  onSearch: () => void;
 }
 
 interface ToolbarButton {
@@ -33,13 +34,21 @@ const buttons: ToolbarButton[] = [
   { key: 'showCardinals', icon: '✦', label: 'Cardinal Points' },
 ];
 
-export function Toolbar({ options, onOptionsChange }: ToolbarProps) {
+export function Toolbar({ options, onOptionsChange, onSearch }: ToolbarProps) {
   const toggle = (key: keyof ToolbarOptions) => {
     onOptionsChange({ ...options, [key]: !options[key] });
   };
 
   return (
     <div className="toolbar">
+      <button
+        className="toolbar-btn search-btn"
+        onClick={onSearch}
+        title="Search"
+      >
+        🔍
+      </button>
+      <div className="toolbar-divider" />
       {buttons.map(({ key, icon, label }) => (
         <button
           key={key}

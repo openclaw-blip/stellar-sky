@@ -1,9 +1,10 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { SkyCanvas } from './components/SkyCanvas';
 import { LocationPicker } from './components/LocationPicker';
 import { TimePicker } from './components/TimePicker';
 import { PlaybackControls } from './components/PlaybackControls';
 import { Toolbar, type ToolbarOptions } from './components/Toolbar';
+import { SearchModal } from './components/SearchModal';
 import { loadStarData, type StarData } from './utils/starLoader';
 import type { GeoLocation } from './utils/astronomy';
 import './App.css';
@@ -67,6 +68,18 @@ function App() {
   
   // Grid/overlay options
   const [toolbarOptions, setToolbarOptions] = useState<ToolbarOptions>(initialSettings.toolbarOptions);
+  
+  // Search
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [navigateTarget, setNavigateTarget] = useState<{ ra: number; dec: number } | null>(null);
+  
+  const handleSearchSelect = useCallback((ra: number, dec: number) => {
+    setNavigateTarget({ ra, dec });
+  }, []);
+  
+  const handleNavigateComplete = useCallback(() => {
+    setNavigateTarget(null);
+  }, []);
   
   // Persist settings when they change
   useEffect(() => {
@@ -153,11 +166,21 @@ function App() {
         location={location}
         date={date}
         gridOptions={toolbarOptions}
+        navigateTarget={navigateTarget}
+        onNavigateComplete={handleNavigateComplete}
       />
       
       <Toolbar
         options={toolbarOptions}
         onOptionsChange={setToolbarOptions}
+        onSearch={() => setSearchOpen(true)}
+      />
+      
+      <SearchModal
+        isOpen={searchOpen}
+        onClose={() => setSearchOpen(false)}
+        onSelect={handleSearchSelect}
+        starData={starData}
       />
       
       <div className="controls">
