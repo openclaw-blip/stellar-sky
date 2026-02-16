@@ -147,6 +147,10 @@
   border-color: var(--accent);
 }
 
+.light-mode .star-reticule.hover .reticule-corner {
+  border-color: rgba(0, 40, 80, 0.8);
+}
+
 /* Mobile */
 @media (max-width: 640px) {
   .constellation-label {
