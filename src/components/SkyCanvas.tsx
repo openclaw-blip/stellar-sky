@@ -300,15 +300,13 @@ export function SkyCanvas({ starData, location, date, gridOptions, onViewChange,
       date
     );
     
-    console.log('Navigate to:', navigateTarget, '-> Alt/Az:', horizontal);
-    
     // Convert to yaw/pitch (radians)
-    // From drag code: viewAzimuth = -yaw * 180/PI (mod 360)
-    // So yaw = -az * PI/180
-    const yaw = -horizontal.az * Math.PI / 180;
+    // Azimuth 0-360 maps to yaw where: yaw = -az (in radians)
+    // But we need to normalize so that az near 360 gives yaw near 0
+    let az = horizontal.az;
+    if (az > 180) az -= 360; // Convert 180-360 to -180-0
+    const yaw = -az * Math.PI / 180;
     const pitch = horizontal.alt * Math.PI / 180;
-    
-    console.log('Setting view: yaw=', yaw * 180 / Math.PI, 'pitch=', pitch * 180 / Math.PI);
     
     // Clamp pitch to valid range
     const clampedPitch = Math.max(-Math.PI / 2 + 0.01, Math.min(Math.PI / 2 - 0.01, pitch));
